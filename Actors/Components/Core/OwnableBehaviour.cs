@@ -170,13 +170,5 @@ namespace CoolTools.Actors
 
             return b;
         }
-        
-        public virtual void Dispose(float delay = 0f, bool doNotDestroy = false)
-        {
-            Disposed?.Invoke();
-            
-            if(!doNotDestroy)
-                Destroy(gameObject, delay);
-        }
     }
 }

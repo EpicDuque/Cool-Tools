@@ -44,59 +44,59 @@ namespace CoolTools.Dependeject
             ResolveDependencies();
         }
 
-#if UNITY_EDITOR
-        [MenuItem("CoolTools/Resolve Dependencies")]
-        private static void ResolveDependenciesEditor()
-        {
-            // Find all Prefabs in the Project
-            if (Instance == null) return;
-            
-            Instance.registry.Clear();
-            
-            string[] guids = AssetDatabase.FindAssets("t:Prefab", searchInFolders: new []{"Assets/2_Prefabs"});
-            var providers = new List<IDependencyProviderEditor>();
-            
-            foreach (string guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-
-                var components = prefab.GetComponentsInChildren<IDependencyProviderEditor>();
-                providers.AddRange(components);
-                
-                foreach (var provider in providers)
-                {
-                    Instance.RegisterProvider(provider);
-                }
-            }
-
-            if (providers.Count == 0)
-            {
-                Debug.Log($"No Providers found.");
-                return;
-            }
-            
-            foreach (var guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                
-                var dirty = false;
-                
-                var injectables = prefab.GetComponentsInChildren<MonoBehaviour>()
-                    .Where(IsInjectable);
-
-                foreach (var injectable in injectables)
-                {
-                    dirty = true;
-                    Instance.Inject(injectable);
-                }
-                
-                if(dirty)
-                    EditorUtility.SetDirty(prefab);
-            }
-        }
-#endif
+// #if UNITY_EDITOR
+//         [MenuItem("CoolTools/Resolve Dependencies")]
+//         private static void ResolveDependenciesEditor()
+//         {
+//             // Find all Prefabs in the Project
+//             if (Instance == null) return;
+//             
+//             Instance.registry.Clear();
+//             
+//             string[] guids = AssetDatabase.FindAssets("t:Prefab", searchInFolders: new []{"Assets/2_Prefabs"});
+//             var providers = new List<IDependencyProviderEditor>();
+//             
+//             foreach (string guid in guids)
+//             {
+//                 string path = AssetDatabase.GUIDToAssetPath(guid);
+//                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+//
+//                 var components = prefab.GetComponentsInChildren<IDependencyProviderEditor>();
+//                 providers.AddRange(components);
+//                 
+//                 foreach (var provider in providers)
+//                 {
+//                     Instance.RegisterProvider(provider);
+//                 }
+//             }
+//
+//             if (providers.Count == 0)
+//             {
+//                 Debug.Log($"No Providers found.");
+//                 return;
+//             }
+//             
+//             foreach (var guid in guids)
+//             {
+//                 string path = AssetDatabase.GUIDToAssetPath(guid);
+//                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+//                 
+//                 var dirty = false;
+//                 
+//                 var injectables = prefab.GetComponentsInChildren<MonoBehaviour>()
+//                     .Where(IsInjectable);
+//
+//                 foreach (var injectable in injectables)
+//                 {
+//                     dirty = true;
+//                     Instance.Inject(injectable);
+//                 }
+//                 
+//                 if(dirty)
+//                     EditorUtility.SetDirty(prefab);
+//             }
+//         }
+// #endif
         
         private void ResolveDependencies()
         {

@@ -14,6 +14,7 @@ namespace CoolTools.Actors
         [SerializeField] private GameObject _model;
         [Tooltip("Enable to detect hits using raycast against last position. Suitable for fast moving projectiles.")]
         [SerializeField] private bool _useRaycast = true;
+        [Tooltip("How long to wait before disposing the projectile after it has been destroyed (Hit or Collision).")]
         [SerializeField] private float _disposeDelay = 0.5f;
         
         [Space(10f)]
@@ -311,10 +312,7 @@ namespace CoolTools.Actors
 
         private void ReturnToPool()
         {
-            if(TryGetComponent<PoolableObject>(out var poolable))
-                poolable.ReturnToPool();
-            else
-                Destroy(gameObject);
+            this.DestroyOrReturn();
         }
 
         public void StopPhysics()
