@@ -1,0 +1,22 @@
+{
+    "name": "CoolTools.Actors",
+    "rootNamespace": "CoolTools.Actors",
+    "references": [
+        "GUID:8f2b894c85007bc49a00f45557077e8e",
+        "GUID:ac41e83e2d7081345953267b874e0f5c",
+        "GUID:f5524bc120094404e9ee8a081d7efa21",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:d86e8fc7461468c4090313d4d6c3c0f4",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:d8b63aba1907145bea998dd612889d6b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

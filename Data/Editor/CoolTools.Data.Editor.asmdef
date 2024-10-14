@@ -1,0 +1,18 @@
+{
+    "name": "CoolTools.Data.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:8f2b894c85007bc49a00f45557077e8e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

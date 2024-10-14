@@ -1,0 +1,232 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using CoolTools.Attributes;
+using CoolTools.Data;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+using UnityEngine;
+
+namespace CoolTools.Actors
+{
+    #pragma warning disable 414
+    [CreateAssetMenu(fileName = "New Actor Formula Evaluator", menuName = "Actor/Evaluators/Actor", order = 0)]
+    public class ActorFormulaEvaluator : FormulaEvaluator
+    {
+        [Serializable]
+        public struct VariableParameter
+        {
+            public string Name;
+            public VariableParamType Type;
+            public IntVariable IntVariable;
+            public FloatVariable FloatVariable;
+        }
+
+        public enum VariableParamType
+        {
+            Int, Float,
+        }
+        
+        [SerializeField] private bool _includeActorPosition = true;
+        [SerializeField, InspectorDisabled] private string _positionParamNames = "a.x, a.y, a.z";
+        
+        [Space(5f)]
+        [SerializeField] private bool _includeActorDamageable = true;
+        [SerializeField, InspectorDisabled] private string _damageableParamNames = "a.hp, a.maxhp, a.pcthp";
+        
+        [Space(5f)]
+        [SerializeField] private bool _includeActorLevel = true;
+        [SerializeField, InspectorDisabled] private string _statProviderParamNames = "a.lvl";
+        
+        [Space(10f)]
+        [SerializeField] private List<VariableParameter> _variableParameters;
+        
+        [Space(10f)]
+        [SerializeField] private List<CustomParameter> _customParameters;
+
+        private StringBuilder _stringBuilder = new ();
+
+        public List<CustomParameter> CustomParameters => _customParameters;
+
+        [Serializable]
+        public struct CustomParameter
+        {
+            public string Name;
+            public float Value;
+        }
+
+        public override float Evaluate(EvaluateParams evalParams)
+        {
+            if (evalParams.Formula == null)
+            {
+                return evalParams.FallBackValue;
+            }
+
+            _inputParameters.Clear();
+            AddInputParameters(evalParams.Formula, evalParams.Source);
+            
+            if(evalParams.Target != null)
+                AddInputParameters(evalParams.Formula, evalParams.Target);
+        
+            evalParams.Parameters = _inputParameters;
+            return base.Evaluate(evalParams);
+        }
+
+        public virtual void AddInputParameters(Formula formula, Actor actor)
+        {
+            if (actor == null) return;
+            formula.RefreshParameters();
+
+            // Refactor above line into a stringbuilder
+            foreach (var av in actor.StatProvider.CurrentStats)
+            {
+                if(av.Attribute == null) continue;
+                
+                // If formula doesnt contain this input parmeter
+                bool all = true;
+                
+                string compare = null;
+
+                foreach (var term in _bakedParameterNames)
+                {
+                    // if(term.Contains("a."))
+                    //     if(term.Split("a.")[1] != av.Attribute.VariableName) continue;
+                    // else if (term != av.Attribute.VariableName) continue;
+                    if (!term.Contains(av.Attribute.VariableName) || 
+                        av.Attribute.VariableName.Length != term.Length - 2) continue;
+                    
+                    compare = term;
+                    break;
+                }
+
+                if (compare == null)
+                {
+                    Debug.LogWarning($"[{nameof(ActorFormulaEvaluator)}] {name} does not contain the parameter {av.Attribute.VariableName}.");
+                    _stringBuilder.Clear();
+                    _stringBuilder.Append("a");
+                    _stringBuilder.Append(".");
+                    _stringBuilder.Append(av.Attribute.VariableName);
+                    compare = _stringBuilder.ToString();
+                    _bakedParameterNames.Add(compare);
+                }
+
+                foreach (var ip in formula.InputParameters)
+                {
+                    if (ip.Name != compare) continue;
+
+                    all = false;
+                    break;
+                }
+
+                if (all) continue;
+
+                var param = new Formula.ParameterInput 
+                { 
+                    Name = compare, 
+                    Value = av.Value
+                };
+                _inputParameters.Add(param);
+            }
+
+            if (_includeActorPosition)
+            {
+                var position = actor.transform.position;
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.x",
+                    Value = position.x
+                });
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.y",
+                    Value = position.y
+                });
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.z",
+                    Value = position.z
+                });
+            }
+
+            if (_includeActorLevel)
+            {
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.lvl",
+                    Value = actor.StatProvider.Level
+                });
+            }
+
+            if (_includeActorDamageable && actor.HasDamageable)
+            {
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.hp",
+                    Value = actor.DamageableResource.Amount
+                });
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.maxhp",
+                    Value = actor.DamageableResource.MaxAmount.Value
+                });
+                _inputParameters.Add(new Formula.ParameterInput
+                {
+                    Name = "a.pcthp",
+                    Value = actor.DamageableResource.Percent
+                });
+            }
+            
+            AddVariableParameters();
+            
+            _inputParameters.AddRange(_customParameters.Select(p => new Formula.ParameterInput
+            {
+                Name = p.Name,
+                Value = p.Value,
+            }));
+        }
+
+        protected void AddVariableParameters()
+        {
+            foreach (var vp in _variableParameters)
+            {
+                if (string.IsNullOrEmpty(vp.Name)) continue;
+
+                var param = new Formula.ParameterInput()
+                {
+                    Name = vp.Name,
+                    Value = vp.Type == VariableParamType.Int ? vp.IntVariable.Value : vp.FloatVariable.Value
+                };
+                _inputParameters.Add(param);
+            }
+        }
+
+#if UNITY_EDITOR
+        public override void BakeParameters()
+        {
+            var attributeNames = new List<string>();
+            
+            // Search for all AttributeSO scripts in the AssetDatabase and add their variableName into attributeNames
+            var guids = AssetDatabase.FindAssets("t:AttributeSO");
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var attribute = AssetDatabase.LoadAssetAtPath<AttributeSO>(path);
+                attributeNames.Add(attribute.VariableName);
+                
+                EditorUtility.SetDirty(attribute);
+            }
+            
+            InsertBakedParameterNames(attributeNames);
+        }
+#endif
+    }
+    
+    public partial struct EvaluateParams
+    {
+        public Actor Source;
+        public Actor Target;
+    }
+}
