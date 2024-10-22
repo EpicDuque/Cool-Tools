@@ -117,8 +117,6 @@ namespace CoolTools.Actors
         private void OnValidate()
         {
             // Actors should always be root Ownable
-            _statProvider = GetComponent<StatProvider>();
-            
             UpdateEffectTargets();
             if (!_autoDetectComponents) return;
             

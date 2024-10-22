@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace CoolTools.Actors
 {
-    [CreateAssetMenu(fileName = "New Launcher Module", menuName = "Modules/Launcher/Default", order = 0)]
+    [CreateAssetMenu(fileName = "New Launcher Module", menuName = "Modules/Launcher/Linear (Default)", order = 0)]
     public class LauncherModule : ScriptableObject
     {
         [SerializeField] private bool _zeroY = true;
@@ -63,6 +63,8 @@ namespace CoolTools.Actors
                 projectile.Initialize(launcher.TargetPosition);
             else
                 projectile.Initialize();
+
+            projectile.OriginLauncher = launcher;
         }
 
         protected virtual Projectile CreateProjectile(ProjectileLauncher launcher, Transform launchPoint, Scene scene)

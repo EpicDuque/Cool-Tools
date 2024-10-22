@@ -7,8 +7,8 @@ namespace CoolTools.Utilities
     public class PoolableObject : MonoBehaviour
     {
         [field:SerializeField, InspectorDisabled] public ObjectPool Pool { get; set; }
-
-        public Transform PoolParent;
+        [InspectorDisabled] public Transform PoolParent;
+        
         public UnityEvent OnObjectPulled;
 
         public virtual void Initialize()

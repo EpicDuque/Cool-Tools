@@ -289,6 +289,11 @@ namespace CoolTools.Utilities
             obj.transform.SetParent(parent);
             return component;
         }
+        
+        public T Pull<T>(T prefab, Vector3 position, Quaternion rotation, Scene moveToScene) where T : Component
+        {
+            return Pull<T>(prefab.name, position, rotation, moveToScene);
+        }
 
         // ReSharper disable Unity.PerformanceAnalysis
         /// <summary>

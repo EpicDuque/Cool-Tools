@@ -14,7 +14,6 @@ namespace CoolTools.Actors
         [SerializeField] private GameObject _model;
         [Tooltip("Enable to detect hits using raycast against last position. Suitable for fast moving projectiles.")]
         [SerializeField] private bool _useRaycast = true;
-        [Tooltip("How long to wait before disposing the projectile after it has been destroyed (Hit or Collision).")]
         [SerializeField] private float _disposeDelay = 0.5f;
         
         [Space(10f)]
@@ -65,6 +64,8 @@ namespace CoolTools.Actors
         public Rigidbody RB => _rigidbody;
 
         public FloatValueConfig MaxSpeed => _maxSpeed;
+        
+        public ProjectileLauncher OriginLauncher { get; set; }
 
         public float Acceleration
         {
@@ -118,7 +119,7 @@ namespace CoolTools.Actors
 
         private void OnEnable()
         {
-            ProjectileRaycastCommandScheduler.RegisterProjectile(this);
+            ProjectileSystem.RegisterProjectile(this);
             _model.SetActive(true);
             HitCount = 0;
             _disposing = false;
@@ -126,7 +127,7 @@ namespace CoolTools.Actors
         
         private void OnDisable()
         {
-            ProjectileRaycastCommandScheduler.UnregisterProjectile(this);
+            ProjectileSystem.UnregisterProjectile(this);
         }
 
         protected new void Awake()
@@ -164,11 +165,17 @@ namespace CoolTools.Actors
             TargetPosition = targetPosition;
             _hasTargetPosition = true;
         }
+
+        public void Initialize(Transform target)
+        {
+            Initialize();
+        }
         
         public void Initialize()
         {
             _events.OnLaunched?.Invoke();
             _hitBox.enabled = true;
+            _disposing = false;
         }
 
         private void OnHitBoxHit(IDamageable other)
@@ -276,21 +283,21 @@ namespace CoolTools.Actors
             if (Target != null)
             {
                 var direction = Target.TargetPoint.position - transform.position;
-                _rigidbody.AddForce(direction.normalized * (_acceleration * _homingFactor), ForceMode.Acceleration);
+                _rigidbody.AddForce(direction.normalized * (_homingFactor), ForceMode.Force);
             }
             else if (_hasTargetPosition)
             {
                 var direction = TargetPosition - transform.position;
-                _rigidbody.AddForce(direction.normalized * _acceleration, ForceMode.Acceleration);
+                _rigidbody.AddForce(direction.normalized * _acceleration, ForceMode.Force);
             } 
             else
             {
-                _rigidbody.AddForce(transform.forward * _acceleration, ForceMode.Acceleration);
+                _rigidbody.AddForce(transform.forward * _acceleration, ForceMode.Force);
             }
             
             // Limit velocity to maxSpeed
-            if (_rigidbody.velocity.sqrMagnitude > _maxSpeed.Value * _maxSpeed.Value)
-                _rigidbody.velocity = _rigidbody.velocity.normalized * _maxSpeed.Value;
+            if(!_rigidbody.isKinematic && _maxSpeed.Value > 0f)
+                _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, _maxSpeed.Value);
         }
 
         public void DisposeProjectile()
@@ -312,7 +319,10 @@ namespace CoolTools.Actors
 
         private void ReturnToPool()
         {
-            this.DestroyOrReturn();
+            if(TryGetComponent<PoolableObject>(out var poolable))
+                poolable.ReturnToPool();
+            else
+                Destroy(gameObject);
         }
 
         public void StopPhysics()

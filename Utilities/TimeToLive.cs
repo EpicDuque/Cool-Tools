@@ -7,6 +7,7 @@ namespace CoolTools.Utilities
     {
         [SerializeField] private float _timeToLive;
         [SerializeField] private bool _autoDispose;
+        [SerializeField] private bool _disableInstead;
 
         public UnityEvent OnTimeOut;
         
@@ -43,6 +44,12 @@ namespace CoolTools.Utilities
         private void DestroyObject()
         {
             if (!_autoDispose) return;
+
+            if (_disableInstead)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
             
             if (_hasPoolableObject)
             {
