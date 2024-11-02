@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CoolTools.Actors
@@ -65,6 +66,25 @@ namespace CoolTools.Actors
                 EventEffects[i].EventName = EventEffects[i].Event != null ?
                     EventEffects[i].Event.EventName : string.Empty;
             }
+        }
+
+        public void InsertAbilityEffect(EffectBase effect)
+        {
+            // Append effect to AbilityEffects array
+            
+            var list = new List<EffectBase>(_abilityEffects) { effect };
+
+            _abilityEffects = list.ToArray();
+        }
+        
+        public void DeleteAbilityEffect(EffectBase effect)
+        {
+            // Remove effect from AbilityEffects array
+            
+            var list = new List<EffectBase>(_abilityEffects);
+            list.Remove(effect);
+
+            _abilityEffects = list.ToArray();
         }
     }
 }

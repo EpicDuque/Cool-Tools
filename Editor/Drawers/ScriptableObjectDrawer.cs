@@ -20,14 +20,14 @@ public class ScriptableObjectDrawer : PropertyDrawer
         position.x += position.width * 0.9f + 2;
         
         // Check if serializedProperty is null
-
+    
         if (property.objectReferenceValue != null)
         {
             if (GUI.Button(new Rect(position) { width = position.width * 0.1f, }, iconEdit))
             {
                 PopUpAssetInspector.Create(property.objectReferenceValue);
             }
-
+    
             return;
         }
         
@@ -41,7 +41,7 @@ public class ScriptableObjectDrawer : PropertyDrawer
             
             var path = EditorUtility.SaveFilePanelInProject($"Create new {typeName}", 
                 $"New {typeName}", "asset", "Message");
-
+    
             if (string.IsNullOrEmpty(path)) return;
             
             var instance = ScriptableObject.CreateInstance(typeName);
@@ -50,12 +50,17 @@ public class ScriptableObjectDrawer : PropertyDrawer
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             EditorUtility.FocusProjectWindow();
-
+    
             PopUpAssetInspector.Create(instance);
-
+    
             property.objectReferenceValue = instance;
         }
         
         EditorGUI.EndProperty();
+    }
+    
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        return EditorGUIUtility.singleLineHeight + 3f;
     }
 }

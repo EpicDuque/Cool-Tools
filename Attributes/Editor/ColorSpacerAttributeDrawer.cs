@@ -13,7 +13,7 @@ namespace CoolTools.Attributes.Editor
         {
             var baseHeight = base.GetHeight() + colorSpacer.spaceHeight;
 
-            return string.IsNullOrEmpty(colorSpacer.title) ? baseHeight : baseHeight + 8f;
+            return string.IsNullOrEmpty(colorSpacer.title) ? baseHeight : baseHeight + 9f;
         }
 
         public override void OnGUI(Rect position)
@@ -37,7 +37,13 @@ namespace CoolTools.Attributes.Editor
             var oldGuiColor = GUI.color;
             GUI.color = colorSpacer.lineColor + new Color(0.25f, 0.25f, 0.25f);
 
-            EditorGUI.LabelField(rect, colorSpacer.title, EditorStyles.boldLabel);
+            var labelStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 14
+            };
+            
+            EditorGUI.LabelField(rect, colorSpacer.title, labelStyle);
 
             GUI.color = oldGuiColor;
         }

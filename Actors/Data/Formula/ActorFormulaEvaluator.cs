@@ -78,6 +78,8 @@ namespace CoolTools.Actors
         public virtual void AddInputParameters(Formula formula, Actor actor)
         {
             if (actor == null) return;
+            if(actor.StatProvider == null) return;
+            
             formula.RefreshParameters();
 
             // Refactor above line into a stringbuilder

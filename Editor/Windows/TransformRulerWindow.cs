@@ -17,7 +17,7 @@ namespace CoolTools.Editor
         private const int MinTransformCount = 2;
         private const int MaxTransformCount = 20;
 
-        [MenuItem("CoolTools/Transform Ruler")]
+        [MenuItem("Tools/CoolTools/Transform Ruler")]
         private static void ShowWindow()
         {
             var window = GetWindow<TransformRulerWindow>();

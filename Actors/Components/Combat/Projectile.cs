@@ -4,6 +4,7 @@ using CoolTools.Utilities;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace CoolTools.Actors
 {
@@ -12,8 +13,15 @@ namespace CoolTools.Actors
     {
         [ColorSpacer("Projectile")] 
         [SerializeField] private GameObject _model;
+        
+        [Space(10f)]
+        [FormerlySerializedAs("_useRaycast")]
         [Tooltip("Enable to detect hits using raycast against last position. Suitable for fast moving projectiles.")]
-        [SerializeField] private bool _useRaycast = true;
+        [SerializeField] private bool _useShapecast = true;
+        [SerializeField] private float _shapeCastRadius = 0.1f;
+        // [SerializeField] private ShapeCastType _castType;
+        
+        [Space(10f)]
         [SerializeField] private float _disposeDelay = 0.5f;
         
         [Space(10f)]
@@ -42,6 +50,12 @@ namespace CoolTools.Actors
         private PoolableObject _poolableObject;
         private bool _disposing;
         private bool _hasTargetPosition;
+
+        private enum ShapeCastType
+        {
+            Box,
+            Sphere
+        }
 
         [Serializable]
         public struct ProjectileEvents
@@ -195,7 +209,7 @@ namespace CoolTools.Actors
 
         private void OnTriggerEnter(Collider other)
         {
-            if (IsValidCollision(other))
+            if (IsValidDestroyCollision(other))
             {
                 DisposeProjectile();
             }
@@ -203,13 +217,13 @@ namespace CoolTools.Actors
 
         private void OnCollisionEnter(Collision other)
         {
-            if (IsValidCollision(other.collider))
+            if (IsValidDestroyCollision(other.collider))
             {
                 DisposeProjectile();
             }
         }
 
-        private bool IsValidCollision(Collider other)
+        private bool IsValidDestroyCollision(Collider other)
         {
             // Check if other is in our _destroyLayerMask
             
@@ -218,9 +232,9 @@ namespace CoolTools.Actors
             return result;
         }
 
-        private void UpdateRayCastHit()
+        private void UpdateShapeCastHit()
         {
-            if (!_useRaycast) return;
+            if (!_useShapecast) return;
             if (_lastPosition == Vector3.zero) return;
             if (HitCount >= _maxHits.Value) return;
                 
@@ -228,14 +242,21 @@ namespace CoolTools.Actors
             // Use the NonAlloc version
             var position = transform.position;
             var direction = _lastPosition - position;
-                
-            var hits = Physics.RaycastNonAlloc(position, direction, 
-                _raycastHits, Vector3.Distance(position, _lastPosition));
+            
+            var hits = Physics.SphereCastNonAlloc(position, _shapeCastRadius, direction, _raycastHits, 
+                direction.magnitude);
                 
             // Loop through all hits and check if any of them are a IDamageable.
             for (var i = 0; i < hits; i++)
             {
                 var hit = _raycastHits[i];
+                // Check if the hit is in the destroy against layer mask
+                if (IsValidDestroyCollision(hit.collider))
+                {
+                    DisposeProjectile();
+                    break;
+                };
+                
                 if (!hit.collider.TryGetComponent<IDamageable>(out var damageable)) continue;
 
                 if (damageable is IOwnable ownable)
@@ -277,7 +298,7 @@ namespace CoolTools.Actors
 
         private void FixedUpdate()
         {
-            UpdateRayCastHit();
+            UpdateShapeCastHit();
             
             // Apply Acceleration to rigidBody
             if (Target != null)

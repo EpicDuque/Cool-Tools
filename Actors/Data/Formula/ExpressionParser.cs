@@ -215,58 +215,63 @@ namespace B83.ExpressionParser
     public class Expression : IValue
     {
         public readonly Dictionary<string, Parameter> Parameters = new ();
+        private readonly Parameter[] m_ParamList = new Parameter[32];
         
         public IValue ExpressionTree { get; set; }
         
         public double Value => ExpressionTree.Value;
 
-        private double[] MultiValue
-        {
-            get {
-                if (ExpressionTree is not MultiParameterList t) return null;
-                
-                double[] res = new double[t.Parameters.Length];
-                
-                for (int i = 0; i < res.Length; i++) res[i] = t.Parameters[i].Value;
-                
-                return res;
-            }
-        }
-        
         public override string ToString()
         {
             return ExpressionTree.ToString();
         }
         
-        public ExpressionDelegate ToDelegate(params string[] aParamOrder)
+        public ExpressionDelegate ToDelegate(string[] aParamOrder)
         {
-            var parameters = new List<Parameter>(aParamOrder.Length);
-            
+            RefreshParamOrder(aParamOrder);
+
+            return p => Invoke(p, m_ParamList);
+        }
+
+        public void RefreshParamOrder(string[] aParamOrder)
+        {
+            for (int i = 0; i < m_ParamList.Length; i++)
+            {
+                m_ParamList[i] = null;
+            }
+
+            foreach (var kvp in Parameters)
+            {
+                kvp.Value.Value = default;
+            }
+
+            var index = 0;
             foreach (var str in aParamOrder)
             {
-                parameters.Add(Parameters.ContainsKey(str) ? Parameters[str] : null);
+                m_ParamList[index] = Parameters.GetValueOrDefault(str);
+                
+                if(m_ParamList[index] != null)
+                    m_ParamList[index].Value = default;
+
+                index++;
             }
-            
-            var parameters2 = parameters.ToArray();
-            
-            return p => Invoke(p, parameters2);
         }
+
+        // public MultiResultDelegate ToMultiResultDelegate(params string[] aParamOrder)
+        // {
+        //     var parameters = new List<Parameter>(aParamOrder.Length);
+        //     
+        //     foreach (var t in aParamOrder)
+        //     {
+        //         parameters.Add(Parameters.ContainsKey(t) ? Parameters[t] : null);
+        //     }
+        //     
+        //     var parameters2 = parameters.ToArray();
+        //     
+        //     return (p) => InvokeMultiResult(p, parameters2);
+        // }
         
-        public MultiResultDelegate ToMultiResultDelegate(params string[] aParamOrder)
-        {
-            var parameters = new List<Parameter>(aParamOrder.Length);
-            
-            foreach (var t in aParamOrder)
-            {
-                parameters.Add(Parameters.ContainsKey(t) ? Parameters[t] : null);
-            }
-            
-            var parameters2 = parameters.ToArray();
-            
-            return (p) => InvokeMultiResult(p, parameters2);
-        }
-        
-        double Invoke(double[] aParams, Parameter[] aParamList)
+        private double Invoke(double[] aParams, Parameter[] aParamList)
         {
             int count = Math.Min(aParamList.Length, aParams.Length);
             
@@ -275,19 +280,20 @@ namespace B83.ExpressionParser
                 if (aParamList[i] != null)
                     aParamList[i].Value = aParams[i];
             }
+            
             return Value;
         }
         
-        double[] InvokeMultiResult(double[] aParams, Parameter[] aParamList)
-        {
-            int count = System.Math.Min(aParamList.Length, aParams.Length);
-            for (int i = 0; i < count; i++)
-            {
-                if (aParamList[i] != null)
-                    aParamList[i].Value = aParams[i];
-            }
-            return MultiValue;
-        }
+        // double[] InvokeMultiResult(double[] aParams, Parameter[] aParamList)
+        // {
+        //     int count = System.Math.Min(aParamList.Length, aParams.Length);
+        //     for (int i = 0; i < count; i++)
+        //     {
+        //         if (aParamList[i] != null)
+        //             aParamList[i].Value = aParams[i];
+        //     }
+        //     return MultiValue;
+        // }
 
         public class ParameterException : Exception { public ParameterException(string aMessage) : base(aMessage) { } }
     }
@@ -575,7 +581,7 @@ namespace B83.ExpressionParser
             return true;
         }
         
-        public Expression EvaluateExpression(string aExpression)
+        public Expression GetExpressionFromString(string aExpression)
         {
             var val = new Expression();
             m_Context = val;
@@ -586,16 +592,6 @@ namespace B83.ExpressionParser
             m_BracketHeap.Clear();
             
             return val;
-        }
-        
-        public double Evaluate(string aExpression)
-        {
-            return EvaluateExpression(aExpression).Value;
-        }
-        
-        public static double Eval(string aExpression)
-        {
-            return new ExpressionParser().Evaluate(aExpression);
         }
         
         public class ParseException : System.Exception { public ParseException(string aMessage) : base(aMessage) { } }

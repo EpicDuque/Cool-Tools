@@ -45,7 +45,7 @@ namespace CoolTools.Dependeject
         }
 
 #if UNITY_EDITOR
-        [MenuItem("CoolTools/Resolve Dependencies")]
+        [MenuItem("Tools/CoolTools/Resolve Dependencies")]
         private static void ResolveDependenciesEditor()
         {
             // Find all Prefabs in the Project

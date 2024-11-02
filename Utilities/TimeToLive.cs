@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using CoolTools.Attributes;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace CoolTools.Utilities
@@ -8,12 +9,12 @@ namespace CoolTools.Utilities
         [SerializeField] private float _timeToLive;
         [SerializeField] private bool _autoDispose;
         [SerializeField] private bool _disableInstead;
+        [SerializeField, InspectorDisabled] private float _count;
 
         public UnityEvent OnTimeOut;
         
         private PoolableObject _poolableObject;
         private bool _hasPoolableObject;
-        private float _count;
 
         private void Awake()
         {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using CoolTools.Attributes;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -21,6 +23,8 @@ namespace CoolTools.Utilities
 
         public string PoolName;
         public List<PoolData> PoolDataList = new ();
+        [FormerlySerializedAs("AssignedPool")] 
+        [InspectorDisabled] public ObjectPool Pool;
 
         private void OnValidate()
         {

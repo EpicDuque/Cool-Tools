@@ -13,8 +13,13 @@ namespace CoolTools.Actors
         [SerializeField] private string variableName = "default";
         [SerializeField] private bool suggestVariableName;
         
+        [Space(10f)] 
+        [SerializeField, TextArea] private string _description;
+        
         public string DefinedName => definedName;
         public string VariableName => variableName;
+
+        public string Description => _description;
 
         // When Assemblies reload, execute below method
         // [InitializeOnLoadMethod]

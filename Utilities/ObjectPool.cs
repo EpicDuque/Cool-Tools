@@ -129,6 +129,8 @@ namespace CoolTools.Utilities
             var poolsCreated = 0;
             
             var operations = new List<AsyncInstantiateOperation<GameObject>>();
+            _config.Pool = this;
+            
             foreach(var data in _config.PoolDataList)
             {
                 var q = new Queue<PoolableObject>();

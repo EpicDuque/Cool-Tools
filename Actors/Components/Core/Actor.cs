@@ -57,7 +57,6 @@ namespace CoolTools.Actors
 
         #region Private Fields
 
-        private List<IDisposable> effectDestroyDisposables = new();
         private List<OwnableBehaviour> ownedBehaviours = new();
 
         #endregion
@@ -116,8 +115,6 @@ namespace CoolTools.Actors
 
         private void OnValidate()
         {
-            // Actors should always be root Ownable
-            UpdateEffectTargets();
             if (!_autoDetectComponents) return;
             
             SearchForBasicComponents();
@@ -178,6 +175,8 @@ namespace CoolTools.Actors
             {
                 StatProvider.Initialize();
             }
+            
+            UpdateEffectTargets();
 
             Events.OnActorInitialized?.Invoke(this);
             IsInitialized = true;
@@ -193,20 +192,24 @@ namespace CoolTools.Actors
             _effectTargets.AddRange(GetComponentsInChildren<EffectTarget>(true)
                 .Where(o => o != null));
 
-            foreach (var disposable in effectDestroyDisposables)
-                disposable.Dispose();
+            // foreach (var disposable in effectDestroyDisposables)
+            //     disposable.Dispose();
+            //
+            // effectDestroyDisposables.Clear();
 
-            effectDestroyDisposables.Clear();
-
-            if (!Application.isPlaying) return;
+            // if (!Application.isPlaying) return;
             
-            foreach (var target in _effectTargets)
-            {
-                effectDestroyDisposables.Add(target.gameObject.OnDestroyAsObservable().First().Subscribe(_ =>
-                {
-                    _effectTargets.Remove(target);
-                }).AddTo(this));
-            }
+            // foreach (var target in _effectTargets)
+            // {
+            //     if (target.gameObject.TryGetComponent<ObservableDestroyTrigger>(out var component))
+            //     {
+            //         Destroy(component);
+            //     }
+            //     effectDestroyDisposables.Add(target.gameObject.OnDestroyAsObservable().First().Subscribe(_ =>
+            //     {
+            //         _effectTargets.Remove(target);
+            //     }).AddTo(this));
+            // }
         }
         
         public void AddEffectTargets(IEnumerable<EffectTarget> targets)

@@ -60,7 +60,7 @@ namespace CoolTools.Actors
             Selection.activeObject = actorObj;
         }
 
-        [MenuItem("CoolTools/Bake Evaluators", false, 0)]
+        [MenuItem("Tools/CoolTools/Bake Evaluators", false, 0)]
         public static void BakeAllParametersIntoEvaluators()
         {
             var guids = AssetDatabase.FindAssets("t:FormulaEvaluator");

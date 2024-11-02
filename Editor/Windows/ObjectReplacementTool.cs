@@ -15,7 +15,7 @@ namespace CoolTools.Editor
         private bool disable;
         private bool applyRotation;
 
-        [MenuItem("CoolTools/Object Replace")]
+        [MenuItem("Tools/CoolTools/Object Replace")]
         private static void ShowWindow()
         {
             var window = GetWindow<ObjectReplacementTool>();

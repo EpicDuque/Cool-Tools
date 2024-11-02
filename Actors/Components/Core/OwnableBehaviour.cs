@@ -165,6 +165,9 @@ namespace CoolTools.Actors
         
         public T SpawnWithOwnership<T>(T obj, Vector3 position, Quaternion rotation, ObjectPool pool) where T : MonoBehaviour, IOwnable
         {
+            if (pool == null)
+                return SpawnWithOwnership(obj, position, rotation);
+            
             var b = pool.Pull<T>(obj.name, position, rotation, gameObject.scene);
             b.Owner = Owner;
 

@@ -95,7 +95,7 @@ namespace CoolTools.Actors
             
             UpdateValue();
         }
-    }
+    }//
     
     [Serializable]
     public class IntValueConfig : ValueConfig<int>

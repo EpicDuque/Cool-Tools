@@ -13,7 +13,7 @@ namespace CoolTools.Actors
         [Serializable]
         public struct ParameterInput
         {
-            [InspectorDisabled] public string Name;
+            [Lockable] public string Name;
             public double Value;
         }
         
@@ -61,11 +61,24 @@ namespace CoolTools.Actors
             
             parser ??= new ExpressionParser();
 
-            cachedExpression = parser.EvaluateExpression(rawExpression);
+            cachedExpression = parser.GetExpressionFromString(rawExpression);
             
             ParsedExpression = cachedExpression.ToString();
-
+            
             RefreshParameters();
+            
+            for (int i = 0; i < MaxParamLength; i++)
+            {
+                _paramOrder[i] = string.Empty;
+            }
+            
+            for (var i = 0; i < inputParameters.Count; i++)
+            {
+                var ip = inputParameters[i];
+                _paramOrder[i] = ip.Name;
+            }
+            
+            cachedDelegate = cachedExpression.ToDelegate(_paramOrder);
         }
 
         public void RefreshParameters()
@@ -91,10 +104,13 @@ namespace CoolTools.Actors
             inputParameters.AddRange(parameters);
         }
 
+        private const int MaxParamLength = 32;
+        private string[] _paramOrder = new string[MaxParamLength];
+        private double[] _paramValues = new double[MaxParamLength];
+        
         /// <summary>
-        /// Evaluate parsed expression with existing parameters
+        /// Evaluate parsed expression with existing parameters.
         /// </summary>
-        /// <returns></returns>
         public double Evaluate()
         {
             if(cachedExpression == null)
@@ -102,27 +118,27 @@ namespace CoolTools.Actors
 
             if (cachedExpression == null) return 0f;
             
-            var paramOrder = new string[inputParameters.Count];
-
+            for (int i = 0; i < MaxParamLength; i++)
+            {
+                _paramValues[i] = 0;
+                _paramOrder[i] = string.Empty;
+            }
+            
             for (var i = 0; i < inputParameters.Count; i++)
             {
                 var ip = inputParameters[i];
-                paramOrder[i] = ip.Name;
+                
+                _paramOrder[i] = ip.Name;
+                _paramValues[i] = ip.Value;
             }
             
-            cachedDelegate = cachedExpression.ToDelegate(paramOrder);
+            cachedExpression.RefreshParamOrder(_paramOrder);
 
-            var paramValues = new double[inputParameters.Count];
-            for (int i = 0; i < inputParameters.Count; i++)
-            {
-                paramValues[i] = inputParameters[i].Value;
-            }
-
-            result = cachedDelegate.Invoke(paramValues);
+            result = cachedDelegate.Invoke(_paramValues);
             return result;
         }
 
-        private string[] _cachedConstants = new[] { "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9" };
+        private readonly string[] _cachedConstants = new[] { "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9" };
 
         public double Evaluate(IEnumerable<ParameterInput> parameters)
         {
