@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace CoolTools.Actors.Editor
@@ -7,26 +8,35 @@ namespace CoolTools.Actors.Editor
     public class EffectBaseDrawer : PropertyDrawer
     {
         private EffectBaseSearchWindow _searchWindow;
-        // private Dictionary<SerializedProperty, bool> _foldoutStates = new();
+        private bool _subAsset;
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
             
+            var asset = property.objectReferenceValue;
+
+            if (asset != null)
+            {
+                var owner = property.serializedObject.targetObject;
+                
+                // Check all sub-assets of the owner asset
+                var subAssets = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(owner));
+                _subAsset = AssetDatabase.IsSubAsset(asset) && subAssets.Contains(asset);
+            }
+            
             var originalColor = GUI.backgroundColor;
-            GUI.backgroundColor = new Color(0.49f, 1f, 0.58f, 0.77f);
+            GUI.backgroundColor = _subAsset ? new Color(0.49f, 1f, 0.58f, 0.77f) : new Color(0.6f, 0.38f, 0.65f);
             var effectPropertyRect = new Rect(position)
             {
                 width = position.width,
                 height = EditorGUIUtility.singleLineHeight + 10f,
             };
             EditorGUI.PropertyField(effectPropertyRect, property, label);
-            
-            
             GUI.backgroundColor = originalColor;
-
-            var asset = property.objectReferenceValue;
-            if (asset != null)
+            
+            // Draw the sub asset inspector
+            if (_subAsset && asset != null)
             {
                 var assetEditor = UnityEditor.Editor.CreateEditor(asset);
                 var iterator = assetEditor.serializedObject.GetIterator();
@@ -69,7 +79,8 @@ namespace CoolTools.Actors.Editor
             var height = base.GetPropertyHeight(property, label) + 10f;
             var asset = property.objectReferenceValue;
 
-            if (asset != null)
+            // Extend property size if subAsset
+            if (_subAsset && asset != null)
             {
                 height += EditorGUIUtility.singleLineHeight + 5f;
                 var assetEditor = UnityEditor.Editor.CreateEditor(asset);

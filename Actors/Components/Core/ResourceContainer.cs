@@ -59,8 +59,8 @@ namespace CoolTools.Actors
 
         private void OnValidate()
         {
-            _maxAmount.UpdateValue(Owner);
-            _regenRate.UpdateValue(Owner);
+            _maxAmount.UpdateValue(this);
+            _regenRate.UpdateValue(this);
             
             if(_amount > MaxAmount.Value)
                 _amount = MaxAmount.Value;

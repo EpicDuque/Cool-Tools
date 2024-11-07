@@ -186,7 +186,14 @@ namespace CoolTools.Actors
             if (_castingAbility.AbilityDuration > 0f)
             {
                 var duration = _castingAbility.AbilityDuration * _durationMultiplier.Value;
-                yield return new WaitForSeconds(duration);
+                // yield return new WaitForSeconds(duration);
+                
+                var timer = 0f;
+                while (timer < duration)
+                {
+                    timer += Time.deltaTime;
+                    yield return null;
+                }
             }
             else
             {
@@ -200,7 +207,9 @@ namespace CoolTools.Actors
             State = CasterState.Cooldown;
             
             // Apply cooldown multipliers here
-            yield return new WaitUntil(() => Cooldown <= 0f);
+            // yield return new WaitUntil(() => Cooldown <= 0f);
+            while(Cooldown > 0f)
+                yield return null;
             
             Cooldown = 0f;
             State = CasterState.Ready;

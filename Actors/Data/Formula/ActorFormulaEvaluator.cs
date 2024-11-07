@@ -16,20 +16,6 @@ namespace CoolTools.Actors
     [CreateAssetMenu(fileName = "New Actor Formula Evaluator", menuName = "Actor/Evaluators/Actor", order = 0)]
     public class ActorFormulaEvaluator : FormulaEvaluator
     {
-        [Serializable]
-        public struct VariableParameter
-        {
-            public string Name;
-            public VariableParamType Type;
-            public IntVariable IntVariable;
-            public FloatVariable FloatVariable;
-        }
-
-        public enum VariableParamType
-        {
-            Int, Float,
-        }
-        
         [SerializeField] private bool _includeActorPosition = true;
         [SerializeField, InspectorDisabled] private string _positionParamNames = "a.x, a.y, a.z";
         
@@ -40,9 +26,6 @@ namespace CoolTools.Actors
         [Space(5f)]
         [SerializeField] private bool _includeActorLevel = true;
         [SerializeField, InspectorDisabled] private string _statProviderParamNames = "a.lvl";
-        
-        [Space(10f)]
-        [SerializeField] private List<VariableParameter> _variableParameters;
         
         [Space(10f)]
         [SerializeField] private List<CustomParameter> _customParameters;
@@ -181,28 +164,11 @@ namespace CoolTools.Actors
                 });
             }
             
-            AddVariableParameters();
-            
             _inputParameters.AddRange(_customParameters.Select(p => new Formula.ParameterInput
             {
                 Name = p.Name,
                 Value = p.Value,
             }));
-        }
-
-        protected void AddVariableParameters()
-        {
-            foreach (var vp in _variableParameters)
-            {
-                if (string.IsNullOrEmpty(vp.Name)) continue;
-
-                var param = new Formula.ParameterInput()
-                {
-                    Name = vp.Name,
-                    Value = vp.Type == VariableParamType.Int ? vp.IntVariable.Value : vp.FloatVariable.Value
-                };
-                _inputParameters.Add(param);
-            }
         }
 
 #if UNITY_EDITOR

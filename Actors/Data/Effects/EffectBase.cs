@@ -6,7 +6,11 @@ namespace CoolTools.Actors
     public class EffectBase : ScriptableObject
     {
         [SerializeField] private string _effectName;
+        [SerializeField, TextArea] private string _effectDescription;
+        
         public string EffectName => _effectName;
+
+        public string EffectDescription => _effectDescription;
 
         public virtual void Execute(Actor source, IDetectable target)
         {
