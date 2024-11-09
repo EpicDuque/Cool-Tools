@@ -1,5 +1,4 @@
-﻿using System;
-using CoolTools.Attributes;
+﻿using CoolTools.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,7 +15,7 @@ namespace CoolTools.Utilities
         
         [Space(10f)]
         [SerializeField] private float _timeToLive;
-        [SerializeField] private bool _autoDispose;
+        [SerializeField] private bool _autoDispose = true;
         [SerializeField] private bool _disableInstead;
         [SerializeField, InspectorDisabled] private float _count;
 

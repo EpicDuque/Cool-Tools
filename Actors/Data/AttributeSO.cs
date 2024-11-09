@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using B83.ExpressionParser;
+using CoolTools.Attributes;
 using UnityEngine;
 
 namespace CoolTools.Actors
@@ -12,6 +13,10 @@ namespace CoolTools.Actors
         [SerializeField] private string definedName = "Default";
         [SerializeField] private string variableName = "default";
         [SerializeField] private bool suggestVariableName;
+        [SerializeField, SpritePreviewSmall] private Sprite _icon;
+        
+        [Space(10f)]
+        [SerializeField] private bool _hidden;
         
         [Space(10f)] 
         [SerializeField, TextArea] private string _description;
@@ -19,6 +24,7 @@ namespace CoolTools.Actors
         public string DefinedName => definedName;
         public string VariableName => variableName;
 
+        public bool Hidden => _hidden;
         public string Description => _description;
 
         // When Assemblies reload, execute below method
