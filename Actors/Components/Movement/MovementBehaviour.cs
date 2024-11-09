@@ -225,11 +225,7 @@ namespace CoolTools.Actors
         
         protected override void OnStatsUpdated()
         {
-            _maxMovementSpeed.UpdateValue(Owner.Evaluator, new EvaluateParams
-            {
-                Source = Owner,
-                Target = null,
-            });
+            _maxMovementSpeed.UpdateValue(this);
             
             SyncAgentProperties();
         }

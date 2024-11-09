@@ -65,19 +65,14 @@ namespace CoolTools.Actors
             _insideDamageables.Clear();
             _damageablesHit.Clear();
             
-            if (Owner != null)
-            {
-                _power.UpdateValue(Owner);
-            }
-            else
-            {
-                _power.UpdateValue();
-            }
+            _power.UpdateValue(this);
         }
 
         protected override void OnStatsUpdated()
         {
-            _power.UpdateValue(Owner);
+            base.OnStatsUpdated();
+            
+            _power.UpdateValue(this);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -87,6 +82,7 @@ namespace CoolTools.Actors
             if (!damageable.IsAlive) return;
             if (_oncePerTarget && _damageablesHit.Contains(damageable)) return;
 
+            _power.UpdateValue(this);
             if (HasOwner && damageable is IOwnable ownable && ownable.HasOwner)
             {
                 if (_factionFilter == FactionOperations.FactionFilterMode.NotOwner)

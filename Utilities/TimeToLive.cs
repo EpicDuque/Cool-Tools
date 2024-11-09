@@ -1,22 +1,35 @@
-﻿using CoolTools.Attributes;
+﻿using System;
+using CoolTools.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace CoolTools.Utilities
 {
+    /// <summary>
+    /// Used to automatically destroy or disable an object after a certain amount of time.
+    /// If a PoolableObject is attached, it will return to the pool instead.
+    /// </summary>
     public class TimeToLive : MonoBehaviour
     {
+        [SerializeField, InspectorDisabled] private bool _hasPoolableObject;
+        [SerializeField, InspectorDisabled] private PoolableObject _poolableObject;
+        
+        [Space(10f)]
         [SerializeField] private float _timeToLive;
         [SerializeField] private bool _autoDispose;
         [SerializeField] private bool _disableInstead;
         [SerializeField, InspectorDisabled] private float _count;
 
+        [Space(10f)]
         public UnityEvent OnTimeOut;
-        
-        private PoolableObject _poolableObject;
-        private bool _hasPoolableObject;
 
-        private void Awake()
+        public float TTL
+        {
+            get => _timeToLive;
+            set => _timeToLive = value;
+        }
+
+        private void OnValidate()
         {
             _hasPoolableObject = TryGetComponent(out _poolableObject);
         }
@@ -27,6 +40,11 @@ namespace CoolTools.Utilities
         }
 
         private void OnDisable()
+        {
+            _count = 0f;
+        }
+
+        public void ResetCount()
         {
             _count = 0f;
         }

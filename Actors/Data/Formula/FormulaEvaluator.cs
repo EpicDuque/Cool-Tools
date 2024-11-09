@@ -14,10 +14,10 @@ namespace CoolTools.Actors
         [SerializeField, InspectorDisabled]
         protected List<string> _bakedParameterNames;
         
-        public virtual float Evaluate(EvaluateParams evalparams)
+        public virtual float Evaluate(EvaluateParams ep)
         {
-            return evalparams.Formula != null ? 
-                (float) evalparams.Formula.Evaluate(evalparams.Parameters) : evalparams.FallBackValue;
+            return ep.Formula != null ? 
+                (float) ep.Formula.Evaluate(ep.Parameters) : ep.FallBackValue;
         }
 
         public void ClearBakedParameterNames()

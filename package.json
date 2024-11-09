@@ -1,8 +1,8 @@
 {
   "name": "com.DuqueForce.CoolTools",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "displayName": "Cool Tools",
-  "description": "Collection of gameplay and editor tools to facilitate development.",
+  "description": "Collection of gameplay and editor tools to boost development.",
   "unity": "2022.3",
   "dependencies": {}, 
   "keywords": [
@@ -13,7 +13,8 @@
     "events",
     "variables",
     "editor",
-    "duque"
+    "duque",
+    "attributes"
   ],
   "author": {
     "name": "Pedro Duquesne",

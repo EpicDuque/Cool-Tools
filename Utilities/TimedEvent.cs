@@ -9,6 +9,7 @@ namespace CoolTools.Utilities
         
         [SerializeField] private float time;
 
+        [Space(10f)]
         public UnityEvent OnTimedEvent;
         
         private void OnEnable()
