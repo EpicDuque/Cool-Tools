@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using CoolTools.Attributes;
 using CoolTools.Utilities;
-using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -117,14 +116,11 @@ namespace CoolTools.Actors
                     Events.OnLevelUp?.Invoke();
 
                 _previousLevel = level;
-                ReactiveLevel.Value = value;
             }
         }
 
         public int MaxLevel => maxLevel;
 
-        public ReactiveProperty<int> ReactiveLevel = new (0);
-        public ReactiveProperty<int> ReactiveExperience = new (0);
 
         public int Experience
         {
@@ -134,7 +130,6 @@ namespace CoolTools.Actors
                 if (level >= maxLevel) return;
                 
                 _experience = value;
-                ReactiveExperience.Value = value;
                 _previousExp = value;
                 UpdateExperience();
             }
@@ -163,7 +158,6 @@ namespace CoolTools.Actors
             Level = initialLevel;
             
             _experience = 0;
-            ReactiveExperience.Value = 0;
 
             if (_useExperience)
             {

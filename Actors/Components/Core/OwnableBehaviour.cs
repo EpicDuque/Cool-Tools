@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using CoolTools.Attributes;
 using CoolTools.Utilities;
-using UniRx;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace CoolTools.Actors
 {
@@ -74,11 +71,11 @@ namespace CoolTools.Actors
             if (GetOwnershipFrom != null)
             {
                 GetOwnershipFrom.OwnershipChanged += OnGetOwnershipOwnerChanged;
-                
-                Observable.EveryUpdate().Take(2).Subscribe(_ =>
-                {
-                    OnGetOwnershipOwnerChanged(GetOwnershipFrom.Owner);
-                }).AddTo(this);
+                OnGetOwnershipOwnerChanged(GetOwnershipFrom.Owner);
+                // Observable.EveryUpdate().Take(2).Subscribe(_ =>
+                // {
+                //     OnGetOwnershipOwnerChanged(GetOwnershipFrom.Owner);
+                // }).AddTo(this);
             }
         }
         
@@ -132,16 +129,16 @@ namespace CoolTools.Actors
                     Owner.StatProvider.StatsUpdated += OnStatsUpdated;
                     OnStatsUpdated();
                 }
-                else
-                {
-                    statProviderSubscribeDisposable?.Dispose();
-                    statProviderSubscribeDisposable = Observable.EveryUpdate()
-                        .First(_ => Owner.HasStatProvider).Subscribe(_ =>
-                    {
-                        Owner.StatProvider.StatsUpdated += OnStatsUpdated;
-                        OnStatsUpdated();
-                    }).AddTo(this);
-                }
+                // else
+                // {
+                //     statProviderSubscribeDisposable?.Dispose();
+                //     statProviderSubscribeDisposable = Observable.EveryUpdate()
+                //         .First(_ => Owner.HasStatProvider).Subscribe(_ =>
+                //     {
+                //         Owner.StatProvider.StatsUpdated += OnStatsUpdated;
+                //         OnStatsUpdated();
+                //     }).AddTo(this);
+                // }
             }
         }
 

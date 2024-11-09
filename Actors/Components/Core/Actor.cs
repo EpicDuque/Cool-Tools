@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CoolTools.Attributes;
-using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Events;
 

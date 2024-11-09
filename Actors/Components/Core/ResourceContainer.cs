@@ -1,6 +1,4 @@
-﻿using System;
-using CoolTools.Attributes;
-using UniRx;
+﻿using CoolTools.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -40,12 +38,9 @@ namespace CoolTools.Actors
             {
                 _amount = Mathf.Clamp(value, 0, MaxAmount.Value);
                 
-                ReactiveAmount.Value = _amount;
                 AmountChanged?.Invoke(_amount);
             }
         }
-        
-        public ReactiveProperty<int> ReactiveAmount { get; } = new();
         
         public float Percent => (float) Amount / MaxAmount.Value;
 
@@ -54,9 +49,7 @@ namespace CoolTools.Actors
             get => _regenRate.Value;
             set => _regenRate.BaseValue = value;
         }
-
-        private IDisposable _regenDisposable;
-
+        
         private void OnValidate()
         {
             _maxAmount.UpdateValue(this);
@@ -69,12 +62,6 @@ namespace CoolTools.Actors
         private void OnEnable()
         {
             Amount = _amount;
-            UpdateRegenInterval();
-        }
-        
-        private void OnDisable()
-        {
-            _regenDisposable?.Dispose();
         }
 
         private void Start()
@@ -92,21 +79,6 @@ namespace CoolTools.Actors
             
             if (oldPercent > 0f)
                 Amount = Mathf.CeilToInt(MaxAmount.Value * oldPercent);
-            
-            UpdateRegenInterval();
-        }
-        
-        public void UpdateRegenInterval()
-        {
-            if (!Application.isPlaying || !HasOwner) return;
-            
-            if (!gameObject.activeInHierarchy) return;
-            
-            _regenDisposable?.Dispose();
-            if(_regenRate.Value <= 0f) return;
-            
-            _regenDisposable = Observable.Interval(TimeSpan.FromSeconds(1f / _regenRate.Value))
-                .Subscribe(_ => Amount++).AddTo(this);
         }
 
         public virtual void Restore()
