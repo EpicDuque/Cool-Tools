@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Linq;
 using CoolTools.Attributes;
-using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -42,7 +41,6 @@ namespace CoolTools.Actors
         protected Actor _castTargetActor;
         // protected Subject<AbilityBase> _endAbilitySubject = new ();
         private bool _abilityEndSignal;
-        protected Subject<AbilityBase> _endEffectSequence = new ();
         
         [field: SerializeField, InspectorDisabled]
         public float Cooldown { get; protected set; }
@@ -229,7 +227,6 @@ namespace CoolTools.Actors
                 }
             }
             
-            _endEffectSequence.OnNext(_castingAbility);
         }
         
         private IEnumerator ExecuteEffectsRoutine(Vector3 position)
@@ -243,7 +240,6 @@ namespace CoolTools.Actors
                 }
             }
             
-            _endEffectSequence.OnNext(_castingAbility);
         }
         
         private IEnumerator ExecuteEffectsRoutine(IDetectable target)
@@ -257,7 +253,6 @@ namespace CoolTools.Actors
                 }
             }
             
-            _endEffectSequence.OnNext(_castingAbility);
         }
         
         private IEnumerator ExecuteEffectsRoutine(Actor target)
@@ -271,7 +266,6 @@ namespace CoolTools.Actors
                 }
             }
             
-            _endEffectSequence.OnNext(_castingAbility);
         }
         
         public void CastAbility()

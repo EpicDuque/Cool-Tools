@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CoolTools.Attributes;
-using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace CoolTools.Actors
 {
@@ -21,13 +19,8 @@ namespace CoolTools.Actors
         [ColorSpacer("Hit Box")] 
         [SerializeField] private IntValueConfig _power;
         [SerializeField] private DamageType _damageType;
-        [FormerlySerializedAs("_hitOnlyOnce")] 
         [SerializeField] private bool _oncePerTarget;
         
-        [Header("Persistent Hits")]
-        [SerializeField] private bool _persistentHits;
-        [SerializeField] private float _persistentHitInterval;
-
         [Space(10f)]
         public HitEvents Events;
         
@@ -36,11 +29,11 @@ namespace CoolTools.Actors
         
         private List<IDamageable> _damageablesHit = new();
         private List<IDamageable> _insideDamageables = new();
-        private Dictionary<IDamageable, IDisposable> _persistentDamageables = new();
         private Collider _hitBoxCollider;
         
-        // public ActorFaction[] Factions => _factions;
         public FactionOperations.FactionFilterMode FactionFilter => _factionFilter;
+        public Collider HBCollider => _hitBoxCollider;
+        public IDamageable[] InsideDamageables => _insideDamageables.ToArray();
 
         public IntValueConfig Power
         {
@@ -102,35 +95,17 @@ namespace CoolTools.Actors
             
             if(!_insideDamageables.Contains(damageable))
                 _insideDamageables.Add(damageable);
+            
+            Hit(damageable, other.ClosestPoint(transform.position));
+        }
 
-            if (_persistentHits)
-            {
-                var observable = Observable.Interval(TimeSpan.FromSeconds(_persistentHitInterval)).Subscribe(_ =>
-                {
-                    // Faction check
-                    if (damageable is IOwnable ownable)
-                    {
-                        if (_factionFilter == FactionOperations.FactionFilterMode.NotOwner)
-                        {
-                            if(ownable.Owner.Faction == Owner.Faction) 
-                                return;
-                        }
-                        else
-                        {
-                            if(ownable.Owner.Faction != Owner.Faction) 
-                                return;
-                        }
-                    }
-                    
-                    Hit(damageable, other.ClosestPoint(transform.position));
-                }).AddTo(this);
-                
-                _persistentDamageables.Add(damageable, observable);
-            }
-            else
-            {
-                Hit(damageable, other.ClosestPoint(transform.position));
-            }
+        private void OnTriggerExit(Collider other)
+        {
+            if (!enabled) return;
+            if (!other.TryGetComponent<IDamageable>(out var damageable)) return;
+            
+            if(_insideDamageables.Contains(damageable))
+                _insideDamageables.Remove(damageable);
         }
 
         public void Hit(IDamageable other, Vector3 hitPoint)
