@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UniRx;
 using UnityEngine.Serialization;
 
 namespace CoolTools.Utilities
@@ -73,8 +72,8 @@ namespace CoolTools.Utilities
         public void Initialize()
         {
             IsCreated = false;
-            Observable.EveryUpdate().First(_ => gameObject.activeSelf && enabled)
-                .Subscribe(_ => StartCoroutine(PoolCreationRoutine())).AddTo(this);
+            // Observable.EveryUpdate().First(_ => gameObject.activeSelf && enabled)
+            //     .Subscribe(_ => StartCoroutine(PoolCreationRoutine())).AddTo(this);
         }
         
         #if UNITY_EDITOR
