@@ -61,7 +61,6 @@ namespace CoolTools.Actors
             
             _hits = new Collider[_maxDetectedAmount];
             _detectedTargets = new Detectable[_maxDetectedAmount];
-            
             _distanceComparator = new DistanceComparator(transform);
             
             for(int i = 0; i < _maxDetectedAmount; i++)
@@ -70,16 +69,6 @@ namespace CoolTools.Actors
             }
         }
 
-        // private void OnEnable()
-        // {
-        //     ScannerSystem.RegisterScanner(this);
-        // }
-        //
-        // private void OnDisable()
-        // {
-        //     ScannerSystem.UnregisterScanner(this);
-        // }
-
         private void Update()
         {
             _objectsToRemove.Clear();
@@ -87,6 +76,7 @@ namespace CoolTools.Actors
             foreach (var obj in _detectedTargets)
             {
                 if(obj == Detectable.Null) continue;
+                
                 if(!obj.gameObject.activeSelf)
                     _objectsToRemove.Add(obj);
             }
