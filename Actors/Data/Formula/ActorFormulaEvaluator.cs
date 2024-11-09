@@ -41,21 +41,21 @@ namespace CoolTools.Actors
             public float Value;
         }
 
-        public override float Evaluate(EvaluateParams evalParams)
+        public override float Evaluate(EvaluateParams ep)
         {
-            if (evalParams.Formula == null)
+            if (ep.Formula == null)
             {
-                return evalParams.FallBackValue;
+                return ep.FallBackValue;
             }
 
             _inputParameters.Clear();
-            AddInputParameters(evalParams.Formula, evalParams.Source);
+            AddInputParameters(ep.Formula, ep.Source);
             
-            if(evalParams.Target != null)
-                AddInputParameters(evalParams.Formula, evalParams.Target);
+            if(ep.Target != null)
+                AddInputParameters(ep.Formula, ep.Target);
         
-            evalParams.Parameters = _inputParameters;
-            return base.Evaluate(evalParams);
+            ep.Parameters = _inputParameters;
+            return base.Evaluate(ep);
         }
 
         public virtual void AddInputParameters(Formula formula, Actor actor)

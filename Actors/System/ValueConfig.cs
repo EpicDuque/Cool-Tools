@@ -46,6 +46,7 @@ namespace CoolTools.Actors
 
         public abstract void UpdateValue();
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public virtual void UpdateValue(OwnableBehaviour ownable)
         {
             if (Application.isPlaying)
@@ -61,6 +62,7 @@ namespace CoolTools.Actors
             }
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public virtual void UpdateValue(Actor owner)
         {
             if (owner.Evaluator == null)
@@ -95,7 +97,7 @@ namespace CoolTools.Actors
             
             UpdateValue();
         }
-    }//
+    }
     
     [Serializable]
     public class IntValueConfig : ValueConfig<int>

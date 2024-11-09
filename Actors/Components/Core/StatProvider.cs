@@ -205,7 +205,7 @@ namespace CoolTools.Actors
                 _currentStats.Add(new StatSheet.AttributeValue
                 {
                     Attribute = attribute,
-                    Value = CalculateStatValue(attribute),
+                    Value = GetStatValue(attribute),
                 });
             }
 
@@ -215,7 +215,7 @@ namespace CoolTools.Actors
             StatsUpdated?.Invoke();
         }
 
-        public int CalculateStatValue(AttributeSO attribute, AttributeModification[] modifications)
+        public int GetStatValue(AttributeSO attribute, AttributeModification[] modifications)
         {
             if (StatSheet == null) return 0;
             
@@ -228,9 +228,9 @@ namespace CoolTools.Actors
             return Mathf.RoundToInt(value);
         }
         
-        public int CalculateStatValue(AttributeSO attribute)
+        public int GetStatValue(AttributeSO attribute)
         {
-            return CalculateStatValue(attribute, AttributeModifications);
+            return GetStatValue(attribute, AttributeModifications);
         }
         
         public AttributeModification GetAttributeModification(AttributeSO attr)

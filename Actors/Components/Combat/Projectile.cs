@@ -122,13 +122,13 @@ namespace CoolTools.Actors
         {
             base.OnStatsUpdated();
 
-            var eparams = new EvaluateParams
-            {
-                Source = Owner,
-            };
-            
-            _maxSpeed.UpdateValue(Owner.Evaluator, eparams);
-            _maxHits.UpdateValue(Owner.Evaluator, eparams);
+            UpdateValues();
+        }
+
+        private void UpdateValues()
+        {
+            _maxSpeed.UpdateValue(this);
+            _maxHits.UpdateValue(this);
         }
 
         private void OnEnable()
@@ -187,6 +187,8 @@ namespace CoolTools.Actors
         
         public void Initialize()
         {
+            UpdateValues();
+            
             _events.OnLaunched?.Invoke();
             _hitBox.enabled = true;
             _disposing = false;

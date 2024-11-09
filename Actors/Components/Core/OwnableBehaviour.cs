@@ -17,14 +17,27 @@ namespace CoolTools.Actors
         // [SerializeField] protected bool _root;
         [Tooltip("Automatically gets ownership from this Ownable.")]
         [SerializeField] private OwnableBehaviour getOwnershipFrom;
+        [SerializeField] private AdvancedSettings _advanced;
         
         private IDisposable statProviderSubscribeDisposable;
+
+        [Serializable]
+        private class AdvancedSettings
+        {
+            [Tooltip("When assigning ownership, subscribe to the Owner's StatProvider's StatsUpdated event. " +
+                     "Disabling this reduces unnecessary allocations and event subscriptions on OwnableBehaviours " +
+                     "that don't require it.")]
+            public bool SubscribeToStatUpdates = true;
+        }
 
         public Actor Owner
         {
             get => _owner;
             set
             {
+                if(_owner == value)
+                    return;
+                
                 PreviousOwner = _owner;
                 _owner = value;
 
@@ -101,7 +114,7 @@ namespace CoolTools.Actors
             {
                 PreviousOwner.UnregisterOwnership(this);
                 
-                if (PreviousOwner.HasStatProvider)
+                if (PreviousOwner.HasStatProvider && _advanced.SubscribeToStatUpdates)
                 {
                     PreviousOwner.StatProvider.StatsUpdated -= OnStatsUpdated;
                 }
@@ -111,21 +124,24 @@ namespace CoolTools.Actors
             OwnershipChanged?.Invoke(newOwner);
             
             Owner.RegisterOwnership(this);
-            
-            if (Owner.HasStatProvider)
+
+            if (_advanced.SubscribeToStatUpdates)
             {
-                Owner.StatProvider.StatsUpdated += OnStatsUpdated;
-                OnStatsUpdated();
-            }
-            else
-            {
-                statProviderSubscribeDisposable?.Dispose();
-                statProviderSubscribeDisposable = Observable.EveryUpdate()
-                    .First(_ => Owner.HasStatProvider).Subscribe(_ =>
+                if (Owner.HasStatProvider)
                 {
                     Owner.StatProvider.StatsUpdated += OnStatsUpdated;
                     OnStatsUpdated();
-                }).AddTo(this);
+                }
+                else
+                {
+                    statProviderSubscribeDisposable?.Dispose();
+                    statProviderSubscribeDisposable = Observable.EveryUpdate()
+                        .First(_ => Owner.HasStatProvider).Subscribe(_ =>
+                    {
+                        Owner.StatProvider.StatsUpdated += OnStatsUpdated;
+                        OnStatsUpdated();
+                    }).AddTo(this);
+                }
             }
         }
 
