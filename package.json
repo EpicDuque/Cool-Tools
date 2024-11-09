@@ -1,10 +1,12 @@
 {
   "name": "com.duqueforce.cooltools",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "displayName": "Cool Tools",
   "description": "Collection of gameplay and editor tools to boost development.",
   "unity": "2022.3",
-  "dependencies": {}, 
+  "dependencies": {
+    "com.neuecc.unirx": "7.1.0"
+  }, 
   "keywords": [
     "engine",
     "cool",
