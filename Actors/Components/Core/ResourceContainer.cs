@@ -1,6 +1,5 @@
 ﻿using CoolTools.Attributes;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace CoolTools.Actors
 {
@@ -18,11 +17,9 @@ namespace CoolTools.Actors
         [Space(10f)]
         [SerializeField] protected int _amount;
         [SerializeField] private bool _initializeAmount;
+
+        private float _regenCooldown;
         
-
-        [Space(10f)] 
-        public UnityEvent<int> AmountChanged;
-
         public ActorResource Resource
         {
             get => _resource;
@@ -34,12 +31,7 @@ namespace CoolTools.Actors
         public virtual int Amount
         {
             get => _amount;
-            set
-            {
-                _amount = Mathf.Clamp(value, 0, MaxAmount.Value);
-                
-                AmountChanged?.Invoke(_amount);
-            }
+            set => _amount = Mathf.Clamp(value, 0, MaxAmount.Value);
         }
         
         public float Percent => (float) Amount / MaxAmount.Value;
@@ -68,6 +60,28 @@ namespace CoolTools.Actors
         {
             if(_initializeAmount)
                 Restore();
+        }
+
+        private void Update()
+        {
+            UpdateRegen();
+        }
+
+        protected virtual void UpdateRegen()
+        {
+            if (RegenRate <= 0f) return;
+            
+            _regenCooldown -= Time.deltaTime;
+                
+            if (_regenCooldown <= 0f)
+            {
+                _regenCooldown = 0f;
+                do
+                {
+                    _regenCooldown += 1f / RegenRate;
+                    Amount++;
+                } while (_regenCooldown < Time.deltaTime);
+            }
         }
 
         protected override void OnStatsUpdated()

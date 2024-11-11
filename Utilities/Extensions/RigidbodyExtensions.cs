@@ -27,5 +27,4 @@ namespace CoolTools.Utilities
             rb.velocity = initVelocity;
         }
     }
-
 }
