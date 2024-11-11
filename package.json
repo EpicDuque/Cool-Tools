@@ -4,9 +4,7 @@
   "displayName": "Cool Tools",
   "description": "Collection of gameplay and editor tools to boost development.",
   "unity": "2022.3",
-  "dependencies": {
-    "com.neuecc.unirx": "7.1.0"
-  }, 
+  "dependencies": {},
   "keywords": [
     "engine",
     "cool",
