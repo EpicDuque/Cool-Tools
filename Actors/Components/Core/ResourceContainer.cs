@@ -1,7 +1,5 @@
-﻿using Codice.Client.BaseCommands;
-using CoolTools.Attributes;
+﻿using CoolTools.Attributes;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace CoolTools.Actors
 {

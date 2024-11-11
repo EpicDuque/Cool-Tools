@@ -1,5 +1,4 @@
-﻿using System;
-using CoolTools.Attributes;
+﻿using CoolTools.Attributes;
 using UnityEngine;
 
 namespace CoolTools.Utilities
@@ -28,5 +27,6 @@ namespace CoolTools.Utilities
         }
 
         public float Evaluate(float x) => curve.Evaluate(x * scaleX) * scaleY;
+        
     }
 }
