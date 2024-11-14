@@ -68,6 +68,9 @@ namespace CoolTools.Actors
         protected int _expBaseLevel;
         protected int _previousExp;
         protected int _previousLevel;
+        
+        private StatSheet.AttributeValue[] _cachedBaseStats;
+        private StatSheet _previousStatSheet;
 
         public StatSheet.AttributeValue[] CurrentStats => _currentStats.ToArray();
 
@@ -188,8 +191,14 @@ namespace CoolTools.Actors
         {
             if (SkipStatUpgradeEvent) return;
             if (StatSheet == null) return;
-            
-            var statsLen = StatSheet.BaseStats.Length;
+
+            if (_previousStatSheet == null || StatSheet != _previousStatSheet)
+            {
+                _previousStatSheet = StatSheet;
+                _cachedBaseStats = StatSheet.BaseStats;
+            }
+
+            var statsLen = _cachedBaseStats.Length;
             
             _currentStats.Clear();
 

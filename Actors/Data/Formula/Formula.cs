@@ -86,15 +86,16 @@ namespace CoolTools.Actors
             inputParameters.Clear();
 
             if (cachedExpression == null) return;
-            
-            var parameters = cachedExpression.Parameters
-                .Select(param => new ParameterInput
+
+            inputParameters.Clear();
+            foreach (var param in cachedExpression.Parameters)
+            {
+                inputParameters.Add(new ParameterInput
                 {
                     Name = param.Key,
-                    Value = param.Value.Value,
-                }).ToList();
-
-            SetParameters(parameters);
+                    Value = param.Value.Value
+                });
+            }
         }
 
         private void SetParameters(IEnumerable<ParameterInput> parameters)
