@@ -1,12 +1,10 @@
 {
   "name": "com.duqueforce.cooltools",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "displayName": "Cool Tools",
   "description": "Collection of gameplay and editor tools to boost development.",
   "unity": "2022.3",
-  "dependencies": {
-    "com.neuecc.unirx": "7.1.0"
-  }, 
+  "dependencies": {}, 
   "keywords": [
     "engine",
     "cool",
@@ -16,7 +14,8 @@
     "variables",
     "editor",
     "duque",
-    "attributes"
+    "attributes",
+    "combat",
   ],
   "author": {
     "name": "Pedro Duquesne",
