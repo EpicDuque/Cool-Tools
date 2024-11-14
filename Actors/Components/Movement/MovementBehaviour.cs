@@ -179,14 +179,14 @@ namespace CoolTools.Actors
             MovementInput = Vector2.zero;
             _limitSpeed = true;
             
-            if(MovementBehaviourSystem.Instanced)
-                MovementBehaviourSystem.RegisterInstance(this);
+            // if(MovementBehaviourSystem.Instanced)
+            //     MovementBehaviourSystem.RegisterInstance(this);
         }
 
         private void OnDisable()
         {
-            if(MovementBehaviourSystem.Instanced)
-                MovementBehaviourSystem.UnregisterInstance(this);
+            // if(MovementBehaviourSystem.Instanced)
+            //     MovementBehaviourSystem.UnregisterInstance(this);
         }
 
         private void Start()
