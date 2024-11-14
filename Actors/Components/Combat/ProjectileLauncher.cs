@@ -43,14 +43,12 @@ namespace CoolTools.Actors
         public bool UseTargetPosition { get; set; }
         public FloatValueConfig LaunchForce => _launchForce;
 
-        public Transform LaunchPoint => _launchPoint;
+        public Transform LaunchPoint
+        {
+            get => _launchPoint;
+            set => _launchPoint = value;
+        }
 
-        // public FloatValueConfig LaunchForce
-        // {
-        //     get => _launchForce;
-        //     set => _launchForce = value;
-        // }
-        
         public Projectile ProjectilePrefab
         {
             get => _projectilePrefab;
