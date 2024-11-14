@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CoolTools.Attributes;
 using CoolTools.Utilities;
 using UnityEngine;
@@ -29,6 +29,7 @@ namespace CoolTools.Actors
 
             [Space(10f)] 
             public bool UseGravity = true;
+            public LayerMask WhatIsGround;
             public float GravityMultiplier = 1f;
             public float TerminalVelocity;
         }
@@ -54,7 +55,6 @@ namespace CoolTools.Actors
         }
         
         [ColorSpacer("Movement Behaviour")] 
-        // [SerializeField] private CCMovementSettings _settings;
         [SerializeField] protected CharacterController _characterController;
         [SerializeField] private NavMeshAgent _navMeshAgent;
 
@@ -62,9 +62,7 @@ namespace CoolTools.Actors
         [SerializeField] private Transform _rotationY;
         
         [Space(10f)]
-        [FormerlySerializedAs("_characterControllerSettings")]
-        [SerializeField] 
-        protected MovementSettings _movementSettings;
+        [SerializeField] protected MovementSettings _movementSettings;
         
         [Space(5f)]
         [SerializeField] protected FloatValueConfig _maxMovementSpeed;
@@ -115,9 +113,8 @@ namespace CoolTools.Actors
         public float Acceleration => _movementSettings.MovementAccel;
 
         /// <summary>
-        /// Represents the intention of movement by the Actor. Use this property to move the Actor by conventinal means.
-        /// You can move your actor however you like, but this property also updates things like the Actor's speed and velocity.
-        /// Also this property takes into account the current movement medium assigned to the Actor.
+        /// Represents the intention of movement by the Actor.
+        /// MovementInput should be provided as an X Y input (Joystick or Buttons) that projects into a X Z plane (Y input is Z axis in world).
         /// </summary>
         public Vector2 MovementInput
         {
@@ -318,6 +315,12 @@ namespace CoolTools.Actors
             RotateStep();
             
             UpdateMovementAnimator(_speed);
+        }
+
+        private void FixedUpdate()
+        {
+            // SphereCast at position to determine if we are grounded.
+            IsGrounded = Physics.OverlapSphereNonAlloc(transform.position, 0.2f, _groundDetectResults, _movementSettings.WhatIsGround) > 0;
         }
 
         /// <summary>
