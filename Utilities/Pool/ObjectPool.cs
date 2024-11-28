@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using R3;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -72,8 +73,8 @@ namespace CoolTools.Utilities
         public void Initialize()
         {
             IsCreated = false;
-            // Observable.EveryUpdate().First(_ => gameObject.activeSelf && enabled)
-            //     .Subscribe(_ => StartCoroutine(PoolCreationRoutine())).AddTo(this);
+            
+            StartCoroutine(PoolCreationRoutine());
         }
         
         #if UNITY_EDITOR
@@ -202,6 +203,7 @@ namespace CoolTools.Utilities
             IsCreated = true;
         }
         
+        // ReSharper disable Unity.PerformanceAnalysis
         public PoolableObject Pull(string key, Vector3 position, Quaternion rotation, Scene moveToScene)
         {
             if (!cachedPool.TryGetValue(key, out var q))
@@ -216,7 +218,8 @@ namespace CoolTools.Utilities
             {
                 if (showWarnings)
                 {
-                    Debug.LogWarning($"[{nameof(ObjectPool)}] Stretching Pool: {PoolName} | Instantiated {key}", gameObject);
+                    Debug.LogWarning($"[{nameof(ObjectPool)}] Stretching Pool: {PoolName} | Instantiated {key}. \n" +
+                                     $"New Pool Size: {q.Count+1}", gameObject);
                 }
 
                 var poolData = new ObjectPoolConfig.PoolData();

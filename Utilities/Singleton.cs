@@ -8,21 +8,8 @@ namespace CoolTools.Utilities
 
         public static T Instance
         {
-            get
-            {
-                // if (_instance == null)
-                // {
-                //     _instance = FindFirstObjectByType<T>();
-                //     if (_instance == null)
-                //     {
-                //         var o = new GameObject("Singleton_" + typeof(T));
-                //         o.AddComponent<T>(); // This should add Instance on Awake
-                //     }
-                // }
+            get => _instance;
 
-                return _instance;
-            }
-            
             protected set => _instance = value;
         }
 

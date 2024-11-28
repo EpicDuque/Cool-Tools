@@ -18,8 +18,14 @@ namespace CoolTools.Actors
         [SerializeField] protected int _amount;
         [SerializeField] private bool _initializeAmount;
 
-        private float _regenCooldown;
-        
+        protected float _regenCooldown;
+
+        public float RegenCooldown
+        {
+            get => _regenCooldown;
+            set => _regenCooldown = value;
+        }
+
         public ActorResource Resource
         {
             get => _resource;

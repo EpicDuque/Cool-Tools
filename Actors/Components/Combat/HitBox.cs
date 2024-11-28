@@ -41,7 +41,7 @@ namespace CoolTools.Actors
             set => _power = value;
         }
 
-        private void OnValidate()
+        protected void OnValidate()
         {
             _power.UpdateValue(this);
         }

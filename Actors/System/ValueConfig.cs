@@ -23,7 +23,7 @@ namespace CoolTools.Actors
         public T Value
         {
             get => _value;
-            set => _value = value;
+            protected set => _value = value;
         }
         
         public float Multiplier
