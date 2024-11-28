@@ -26,6 +26,7 @@ namespace CoolTools.Utilities
             CurrentState.Update();
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public virtual void TransitionTo(State newState)
         {
             CurrentState.OnExit();
@@ -39,6 +40,7 @@ namespace CoolTools.Utilities
         public abstract class State
         {
             public StateMachine Context { get; }
+            
             private readonly Dictionary<State, Func<bool>> transitions = new();
 
             public State(StateMachine context)
@@ -59,7 +61,6 @@ namespace CoolTools.Utilities
 
             public State EvaluateTransitions()
             {
-                // var trans = new KeyValuePair<State, Func<bool>>();
                 foreach (var kvp in transitions)
                 {
                     if (kvp.Value.Invoke())

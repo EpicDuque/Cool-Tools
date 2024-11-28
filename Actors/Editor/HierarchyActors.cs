@@ -17,13 +17,14 @@ namespace CoolTools.Utilities
 
         private static void HierarchyWindowItemOnGui(int instanceid, Rect selectionrect)
         {
+            if (_icon == null) return;
             GameObject go = EditorUtility.InstanceIDToObject(instanceid) as GameObject;
             
             if (go != null && go.TryGetComponent<Actor>(out _))
             {
                 var r = new Rect(selectionrect)
                 {
-                    x = selectionrect.x -= 20,
+                    x = selectionrect.x -= 30,
                     width = 18
                 };
 

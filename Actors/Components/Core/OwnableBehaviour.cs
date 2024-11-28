@@ -127,19 +127,10 @@ namespace CoolTools.Actors
                 if (Owner.HasStatProvider)
                 {
                     Owner.StatProvider.StatsUpdated += OnStatsUpdated;
-                    OnStatsUpdated();
                 }
-                // else
-                // {
-                //     statProviderSubscribeDisposable?.Dispose();
-                //     statProviderSubscribeDisposable = Observable.EveryUpdate()
-                //         .First(_ => Owner.HasStatProvider).Subscribe(_ =>
-                //     {
-                //         Owner.StatProvider.StatsUpdated += OnStatsUpdated;
-                //         OnStatsUpdated();
-                //     }).AddTo(this);
-                // }
             }
+            
+            OnStatsUpdated();
         }
 
         /// <summary>

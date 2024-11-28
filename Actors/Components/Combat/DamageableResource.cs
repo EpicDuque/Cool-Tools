@@ -65,7 +65,7 @@ namespace CoolTools.Actors
         public int Health => Amount;
         public int MaxHealth => MaxAmount.Value;
 
-        public void DealDamage(DamageParams data)
+        public virtual void DealDamage(DamageParams data)
         {
             if (!IsAlive) return;
             if (Invincible) return;
@@ -80,7 +80,7 @@ namespace CoolTools.Actors
         }
 
         [ContextMenu("Kill")]
-        public void Kill()
+        public virtual void Kill()
         {
             var data = new DamageParams
             {

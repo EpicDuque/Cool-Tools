@@ -2,8 +2,7 @@
 
 namespace CoolTools.Actors
 {
-    // Do Not make this abstract, in case it needs to be used on Visual Scripting
-    public class EffectBase : ScriptableObject
+    public abstract class EffectBase : ScriptableObject
     {
         [SerializeField] private string _effectName;
         [SerializeField, TextArea] private string _effectDescription;
@@ -28,6 +27,7 @@ namespace CoolTools.Actors
         {
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public virtual void ResetEffect(Actor target)
         {
         }
