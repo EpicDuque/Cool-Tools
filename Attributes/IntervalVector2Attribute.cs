@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 
-public class IntervalVector2Attribute : PropertyAttribute
+namespace CoolTools.Attributes
 {
-    public float min, max;
-
-    public IntervalVector2Attribute(float min, float max)
+    public class IntervalVector2Attribute : PropertyAttribute
     {
-        this.min = min;
-        this.max = max;
+        public float min, max;
+
+        public IntervalVector2Attribute(float min, float max)
+        {
+            this.min = min;
+            this.max = max;
+        }
     }
 }

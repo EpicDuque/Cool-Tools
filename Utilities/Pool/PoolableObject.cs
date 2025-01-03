@@ -31,7 +31,7 @@ namespace CoolTools.Utilities
 
         public static void DestroyOrReturn(GameObject obj)
         {
-            obj.transform.localScale = Vector3.one;
+            // obj.transform.localScale = Vector3.one;
             
             if (obj.TryGetComponent<PoolableObject>(out var poolable))
             {

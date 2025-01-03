@@ -61,7 +61,7 @@ namespace CoolTools.Actors
             }
         }
         public GameObject GO => gameObject;
-        public bool IsAlive => Amount > 0;
+        public virtual bool IsAlive => Amount > 0;
         public int Health => Amount;
         public int MaxHealth => MaxAmount.Value;
 
@@ -70,8 +70,8 @@ namespace CoolTools.Actors
             if (!IsAlive) return;
             if (Invincible) return;
 
-            Amount -= data.Amount;
             LastDamage = data;
+            Amount -= data.Amount;
             
             if(data.Amount < 0)
                 Events.OnHeal?.Invoke(data.Amount);
