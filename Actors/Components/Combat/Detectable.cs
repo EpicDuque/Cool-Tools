@@ -10,7 +10,8 @@ namespace CoolTools.Actors
         [SerializeField] private Transform _targetPoint;
         [SerializeField] private bool _bypassDetection;
         [SerializeField] private bool _trackingPositionGizmo;
-
+        [SerializeField] private float _targetRadius = 1f;
+        
         private MovementBehaviour _movement;
         private Rigidbody _rb;
         
@@ -27,7 +28,13 @@ namespace CoolTools.Actors
             get => _bypassDetection;
             set => _bypassDetection = value;
         }
-        
+
+        public float TargetRadius
+        {
+            get => _targetRadius;
+            set => _targetRadius = value;
+        }
+
         public static Detectable Null;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

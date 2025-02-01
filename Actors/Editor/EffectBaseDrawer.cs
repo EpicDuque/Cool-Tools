@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CoolTools.Actors.Editor
 {
@@ -9,13 +11,13 @@ namespace CoolTools.Actors.Editor
     {
         private EffectBaseSearchWindow _searchWindow;
         private bool _subAsset;
-        
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
             
             var asset = property.objectReferenceValue;
-
+        
             if (asset != null)
             {
                 var owner = property.serializedObject.targetObject;
@@ -66,7 +68,7 @@ namespace CoolTools.Actors.Editor
                     // Increase Y by the height of the last property
                     position.y += propertyHeight + 2f;
                 }
-
+        
                 assetEditor.serializedObject.ApplyModifiedProperties();
                 EditorGUI.EndFoldoutHeaderGroup();
             }
@@ -78,7 +80,7 @@ namespace CoolTools.Actors.Editor
         {
             var height = base.GetPropertyHeight(property, label) + 10f;
             var asset = property.objectReferenceValue;
-
+        
             // Extend property size if subAsset
             if (_subAsset && asset != null)
             {
@@ -95,7 +97,7 @@ namespace CoolTools.Actors.Editor
                     height += EditorGUI.GetPropertyHeight(iterator, true) + 2f;
                 }
             }
-
+        
             return height;
         }
     }

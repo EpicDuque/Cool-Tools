@@ -1,6 +1,7 @@
 ﻿using CoolTools.Attributes;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace CoolTools.Utilities
 {
@@ -9,12 +10,13 @@ namespace CoolTools.Utilities
         [field:SerializeField, InspectorDisabled] public ObjectPool Pool { get; set; }
         [InspectorDisabled] public Transform PoolParent;
         
-        public UnityEvent OnObjectPulled;
+        public UnityEvent ObjectPulled;
+        public UnityEvent ObjectReturned;
 
         public virtual void Initialize()
         {
             gameObject.SetActive(true);
-            OnObjectPulled?.Invoke();
+            ObjectPulled?.Invoke();
         }
         
         public virtual void ReturnToPool()
@@ -25,13 +27,15 @@ namespace CoolTools.Utilities
                 return;
             }
             
+            ObjectReturned?.Invoke();
+            
             gameObject.SetActive(false);
             Pool.Put(this);
         }
 
         public static void DestroyOrReturn(GameObject obj)
         {
-            obj.transform.localScale = Vector3.one;
+            // obj.transform.localScale = Vector3.one;
             
             if (obj.TryGetComponent<PoolableObject>(out var poolable))
             {

@@ -28,6 +28,8 @@ namespace CoolTools.Utilities
             set => _timeToLive = value;
         }
 
+        private bool _disposing = false;
+
         private void OnValidate()
         {
             _hasPoolableObject = TryGetComponent(out _poolableObject);
@@ -35,7 +37,7 @@ namespace CoolTools.Utilities
 
         private void OnEnable()
         {
-            _count = 0f;
+            ResetCount();
         }
 
         private void OnDisable()
@@ -46,14 +48,16 @@ namespace CoolTools.Utilities
         public void ResetCount()
         {
             _count = 0f;
+            _disposing = false;
         }
 
         private void Update()
         {
             _count += Time.deltaTime;
 
-            if (_count >= _timeToLive)
+            if (!_disposing && _count >= _timeToLive)
             {
+                _disposing = true;
                 OnTimeOut?.Invoke();
                 DestroyObject();
             }

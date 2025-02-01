@@ -23,7 +23,6 @@ namespace CoolTools.Utilities
 
         public string PoolName;
         public List<PoolData> PoolDataList = new ();
-        [FormerlySerializedAs("AssignedPool")] 
         [InspectorDisabled] public ObjectPool Pool;
 
         private void OnValidate()

@@ -28,5 +28,6 @@ namespace CoolTools.Utilities
 
         public float Evaluate(float x) => curve.Evaluate(x * scaleX) * scaleY;
         
+        public int EvaluateRounded(float x) => Mathf.RoundToInt(Evaluate(x));
     }
 }

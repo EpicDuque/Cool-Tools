@@ -10,6 +10,9 @@ namespace CoolTools.Actors
         [ColorSpacer("Damageable Resource")] 
         [SerializeField] protected bool _invincible;
         
+        [Space(10f)] 
+        [SerializeField] private DamageMultiplier[] _multipliers;
+        
         [ColorSpacer("Events")]
         [SerializeField] protected DamageableEvents _damageableEvents;
         
@@ -30,6 +33,7 @@ namespace CoolTools.Actors
         {
             [Space(10f)]
             public DamageType DamageType;
+            public bool AllTypes;
             
             [Space(5f)]
             public Formula FormulaMultiplier;
@@ -61,7 +65,7 @@ namespace CoolTools.Actors
             }
         }
         public GameObject GO => gameObject;
-        public bool IsAlive => Amount > 0;
+        public virtual bool IsAlive => Amount > 0;
         public int Health => Amount;
         public int MaxHealth => MaxAmount.Value;
 
@@ -70,8 +74,11 @@ namespace CoolTools.Actors
             if (!IsAlive) return;
             if (Invincible) return;
 
-            Amount -= data.Amount;
+            var amount = Mathf.RoundToInt(data.Amount * GetMultiplier(data.Type));
+            data.Amount = amount;
+            
             LastDamage = data;
+            Amount -= data.Amount;
             
             if(data.Amount < 0)
                 Events.OnHeal?.Invoke(data.Amount);
@@ -79,6 +86,21 @@ namespace CoolTools.Actors
                 Events.OnDamage?.Invoke(data.Amount);
         }
 
+        private float GetMultiplier(DamageType damageType)
+        {
+            float totalMultiplier = 1f;
+            
+            foreach (var multiplier in _multipliers)
+            {
+                if (multiplier.AllTypes || multiplier.DamageType == damageType)
+                {
+                    totalMultiplier *= multiplier.Multiplier;
+                }
+            }
+
+            return totalMultiplier;
+        }
+        
         [ContextMenu("Kill")]
         public virtual void Kill()
         {
@@ -95,8 +117,8 @@ namespace CoolTools.Actors
         {
             if (IsAlive) return;
             
-            Events.OnRevive?.Invoke();
             Restore();
+            Events.OnRevive?.Invoke();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace CoolTools.Attributes.Editor
         {
             var baseHeight = base.GetHeight() + colorSpacer.spaceHeight;
 
-            return string.IsNullOrEmpty(colorSpacer.title) ? baseHeight : baseHeight + 9f;
+            return string.IsNullOrEmpty(colorSpacer.title) ? baseHeight : baseHeight + 12f;
         }
 
         public override void OnGUI(Rect position)

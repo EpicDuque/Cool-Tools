@@ -133,6 +133,8 @@ namespace CoolTools.Utilities
             
             foreach(var data in _config.PoolDataList)
             {
+                if (data.Prefab == null) continue;
+                
                 var q = new Queue<PoolableObject>();
                 var parent = new GameObject($"Pool_{data.Key}");
                 parent.transform.position = new Vector3(0f, 1000f, 0f);
@@ -142,6 +144,7 @@ namespace CoolTools.Utilities
                 parents.Add(parent.transform);
                 
                 operations.Clear();
+                
                 if (data.Size > 0)
                 {
                     if (_instantiateAsync)
@@ -154,6 +157,7 @@ namespace CoolTools.Utilities
                     }
                     else
                     {
+                        
                         for (int i = 0; i < data.Size; i++)
                         {
                             var obj = Instantiate(data.Prefab, parent.transform);
@@ -316,9 +320,11 @@ namespace CoolTools.Utilities
             instance.transform.SetParent(null);
             SceneManager.MoveGameObjectToScene(instance.gameObject, gameObject.scene);
 
-            Transform myTransform;
-            (myTransform = instance.transform).SetParent(parent);
-            myTransform.parent = parent;
+            // Transform myTransform;
+            // (myTransform = instance.transform).SetParent(parent);
+            // myTransform.parent = parent;
+            var myTransform = instance.transform;
+            myTransform.SetParent(parent, false);
 
             myTransform.localPosition = Vector3.zero;
             myTransform.localRotation = Quaternion.identity;

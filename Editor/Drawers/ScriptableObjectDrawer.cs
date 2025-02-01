@@ -12,48 +12,55 @@ public class ScriptableObjectDrawer : PropertyDrawer
         
         EditorGUI.BeginProperty(position, label, property);
         
-        EditorGUI.PropertyField(new Rect(position)
-        {
-            width = position.width * 0.9f,
-        }, property, label);
+        var isHovering = position.Contains(Event.current.mousePosition);
         
-        position.x += position.width * 0.9f + 2;
+        // Get the rect of the label
+        var controlRect = EditorGUI.PrefixLabel(position, label);
+        EditorGUI.PropertyField(position, property);
         
-        // Check if serializedProperty is null
-    
-        if (property.objectReferenceValue != null)
+        if (isHovering)
         {
-            if (GUI.Button(new Rect(position) { width = position.width * 0.1f, }, iconEdit))
+            // position.x += width + 2;
+            // Check if serializedProperty is null
+
+            // Get the last used rect property
+            var buttonPosition = new Rect(position)
             {
-                PopUpAssetInspector.Create(property.objectReferenceValue);
+                x = controlRect.xMin - 45f,
+                width = 45f,
+            };
+            if (property.objectReferenceValue != null)
+            {
+                if (GUI.Button(buttonPosition, iconEdit))
+                {
+                    PopUpAssetInspector.Create(property.objectReferenceValue);
+                }
+        
+                return;
             }
-    
-            return;
-        }
         
-        // position.x += position.width * 0.05f;
+            if (GUI.Button(buttonPosition, iconNew))
+            {
+                var typeName = property.type
+                    .Replace("PPtr<$", "")
+                    .Replace(">", "");
+                
+                var path = EditorUtility.SaveFilePanelInProject($"Create new {typeName}", 
+                    $"New {typeName}", "asset", "Message");
         
-        if (GUI.Button(new Rect(position) { width = position.width * 0.1f, }, iconNew))
-        {
-            var typeName = property.type
-                .Replace("PPtr<$", "")
-                .Replace(">", "");
-            
-            var path = EditorUtility.SaveFilePanelInProject($"Create new {typeName}", 
-                $"New {typeName}", "asset", "Message");
-    
-            if (string.IsNullOrEmpty(path)) return;
-            
-            var instance = ScriptableObject.CreateInstance(typeName);
-            
-            AssetDatabase.CreateAsset(instance, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            EditorUtility.FocusProjectWindow();
-    
-            PopUpAssetInspector.Create(instance);
-    
-            property.objectReferenceValue = instance;
+                if (string.IsNullOrEmpty(path)) return;
+                
+                var instance = ScriptableObject.CreateInstance(typeName);
+                
+                AssetDatabase.CreateAsset(instance, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                EditorUtility.FocusProjectWindow();
+        
+                PopUpAssetInspector.Create(instance);
+        
+                property.objectReferenceValue = instance;
+            }
         }
         
         EditorGUI.EndProperty();

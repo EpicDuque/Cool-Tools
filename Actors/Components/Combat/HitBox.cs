@@ -20,6 +20,7 @@ namespace CoolTools.Actors
         [SerializeField] private IntValueConfig _power;
         [SerializeField] private DamageType _damageType;
         [SerializeField] private bool _oncePerTarget;
+        [SerializeField] private bool _hitInvincibles = true;
         
         [Space(10f)]
         public HitEvents Events;
@@ -73,6 +74,8 @@ namespace CoolTools.Actors
             if (!enabled) return;
             if (!other.TryGetComponent<IDamageable>(out var damageable)) return;
             if (!damageable.IsAlive) return;
+            
+            if (!_hitInvincibles && damageable.Invincible) return;
             if (_oncePerTarget && _damageablesHit.Contains(damageable)) return;
 
             _power.UpdateValue(this);

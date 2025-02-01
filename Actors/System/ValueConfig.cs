@@ -7,10 +7,13 @@ namespace CoolTools.Actors
     [Serializable]
     public abstract class ValueConfig<T>
     {
+        [SerializeField] private T _value;
+        
+        [Space(10f)]
         [SerializeField] private T _baseValue;
         [SerializeField] private Formula _formulaBaseValue;
         
-        [SerializeField] private T _value;
+        [Space(10f)]
         [SerializeField] private float _multiplier;
         [SerializeField] private T _offset;
         
@@ -62,6 +65,10 @@ namespace CoolTools.Actors
             }
         }
 
+        public virtual void UpdateValue(FormulaEvaluator evaluator)
+        {
+        }
+
         // ReSharper disable Unity.PerformanceAnalysis
         public virtual void UpdateValue(Actor owner)
         {
@@ -85,6 +92,16 @@ namespace CoolTools.Actors
             Value = BaseValue * Multiplier + Offset;
         }
 
+        public override void UpdateValue(FormulaEvaluator evaluator)
+        {
+            if (FormulaBaseValue != null)
+            {
+                BaseValue = evaluator.Evaluate(new EvaluateParams { Formula = FormulaBaseValue });
+            }
+            
+            UpdateValue();
+        }
+
         public override void UpdateValue(FormulaEvaluator evaluator, EvaluateParams evaluateParams)
         {
             if (FormulaBaseValue != null)
@@ -105,6 +122,17 @@ namespace CoolTools.Actors
         public override void UpdateValue()
         {
             Value = Mathf.RoundToInt(BaseValue * Multiplier + Offset);
+        }
+        
+        public override void UpdateValue(FormulaEvaluator evaluator)
+        {
+            if (FormulaBaseValue != null)
+            {
+                var result = evaluator.Evaluate(new EvaluateParams { Formula = FormulaBaseValue });
+                BaseValue = Mathf.RoundToInt(result);
+            }
+            
+            UpdateValue();
         }
         
         public override void UpdateValue(FormulaEvaluator evaluator, EvaluateParams evaluateParams)

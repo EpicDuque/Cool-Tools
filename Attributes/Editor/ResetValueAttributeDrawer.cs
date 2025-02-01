@@ -1,5 +1,4 @@
-﻿using CoolTools.Attributes;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace CoolTools.Attributes.Editor

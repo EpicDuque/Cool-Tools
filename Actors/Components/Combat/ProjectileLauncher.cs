@@ -12,7 +12,8 @@ namespace CoolTools.Actors
         [Serializable]
         public struct ProjectileLaunchEvents
         {
-            public UnityEvent<Projectile> OnLaunched;
+            public UnityEvent OnLaunched;
+            public UnityEvent<Projectile> OnLaunchedProjectile;
         }
 
         [ColorSpacer("Projectile Launcher")]
@@ -21,6 +22,7 @@ namespace CoolTools.Actors
         
         [Space(10f)] 
         [SerializeField] private LauncherModule _launchModule;
+        [SerializeField, InspectorDisabled] private LauncherModule _moduleInstance;
         
         [Space(10f)]
         [SerializeField] private Transform _launchPoint;
@@ -31,6 +33,7 @@ namespace CoolTools.Actors
 
         private static ObjectPool Pool;
         private bool _usePool;
+        private bool _hasPool;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void ResetDomain()
@@ -38,9 +41,9 @@ namespace CoolTools.Actors
             Pool = null;
         }
         
-        public IDetectable Target { get; set; }
+        public Detectable Target { get; set; } = Detectable.Null;
         public Vector3 TargetPosition { get; set; }
-        public bool UseTargetPosition { get; set; }
+        
         public FloatValueConfig LaunchForce => _launchForce;
 
         public Transform LaunchPoint
@@ -57,19 +60,27 @@ namespace CoolTools.Actors
 
         public ProjectileLaunchEvents Events => _events;
 
+        public LauncherModule ModuleInstance => _moduleInstance;
+        
+        public TargetMode ETargetMode { get; set; }
+
+        public enum TargetMode
+        {
+            None,
+            Detectable,
+            Position,
+        }
+
         private void Start()
         {
-            
+            _moduleInstance = Instantiate(_launchModule);
         }
 
         protected override void OnStatsUpdated()
         {
             base.OnStatsUpdated();
-            
-            _launchForce.UpdateValue(Owner.Evaluator, new EvaluateParams
-            {
-                Source = Owner,
-            });
+
+            _launchForce.UpdateValue(this);
         }
 
         private void OnValidate()
@@ -84,23 +95,23 @@ namespace CoolTools.Actors
             _usePool = _poolConfig != null;
         }
 
-        [UsedImplicitly]
         public virtual void Launch()
         {
             if (_usePool)
             {
-                if (Pool == null)
-                    Pool = ObjectPool.GetPool(_poolConfig.PoolName);
-
-                if (Pool == null) return;
-                
+                if (!_hasPool)
+                {
+                    Pool = ObjectPool.GetPool(_poolConfig);
+                    _hasPool = Pool != null;
+                }
             }
             
-            _launchModule.SetPool(Pool);
+            LaunchForce.UpdateValue(this);
             
-            var p = _launchModule.Launch(this);
+            ModuleInstance.UsePool = _hasPool;
+            ModuleInstance.Launch(this, Pool);
             
-            _events.OnLaunched?.Invoke(p);
+            Events.OnLaunched?.Invoke();
         }
     }
 }
