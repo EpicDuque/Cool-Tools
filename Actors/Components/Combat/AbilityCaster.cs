@@ -33,14 +33,22 @@ namespace CoolTools.Actors
         [SerializeField] protected Events _actorCombatEvents;
         
         [Header("Debug")]
-        [SerializeField, InspectorDisabled] protected Transform _castTargetPoint;
-        [SerializeField, InspectorDisabled] protected Vector3 _castPosition;
         [SerializeField, InspectorDisabled] protected CasterState _state;
+        [SerializeField, InspectorDisabled] private CastingTarget _castingTarget;
         
-        protected IDetectable _castTarget;
-        protected Actor _castTargetActor;
-        // protected Subject<AbilityBase> _endAbilitySubject = new ();
         private bool _abilityEndSignal;
+        
+        private Vector3 _targetPosition;
+        private IDetectable _targetDetectable;
+        private Actor _targetActor;
+        
+        private enum CastingTarget
+        {
+            None,
+            Position,
+            IDetectable,
+            Actor,
+        }
         
         [field: SerializeField, InspectorDisabled]
         public float Cooldown { get; protected set; }
@@ -157,14 +165,25 @@ namespace CoolTools.Actors
 
                 if (ev.Event == null) return;
                 
-                // if(Owner.name.Contains("Player"))
-                //     Debug.Log($"[{nameof(AbilityCaster)}] Found Event: {ev.Event.EventName} ({ev.Event.name})");
-
-                // Do The event here
                 foreach (var effect in ev.Effects)
                 {
-                    // TODO: Check if we are casting with target or position so we execute these with target or position as well.
-                    effect.Execute(Owner);
+                    switch (_castingTarget)
+                    {
+                        case CastingTarget.None:
+                            effect.Execute(Owner);
+                            break;
+                        case CastingTarget.Position:
+                            effect.Execute(Owner, _targetPosition);
+                            break;
+                        case CastingTarget.IDetectable:
+                            effect.Execute(Owner, _targetDetectable);
+                            break;
+                        case CastingTarget.Actor:
+                            effect.Execute(Owner, _targetActor);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
             else
@@ -215,6 +234,38 @@ namespace CoolTools.Actors
             _castingRoutine = null;
             _abilityEndSignal = false;
         }
+
+        private void ExecuteEffects()
+        {
+            foreach (var effect in _castingAbility.AbilityEffects)
+            {
+                effect.Execute(Owner);
+            }
+        }
+        
+        private void ExecuteEffects(Vector3 position)
+        {
+            foreach (var effect in _castingAbility.AbilityEffects)
+            {
+                effect.Execute(Owner, position);
+            }
+        }
+        
+        private void ExecuteEffects(IDetectable target)
+        {
+            foreach (var effect in _castingAbility.AbilityEffects)
+            {
+                effect.Execute(Owner, target);
+            }
+        }
+        
+        private void ExecuteEffects(Actor target)
+        {
+            foreach (var effect in _castingAbility.AbilityEffects)
+            {
+                effect.Execute(Owner, target);
+            }
+        }
         
         private IEnumerator ExecuteEffectsRoutine()
         {
@@ -226,7 +277,6 @@ namespace CoolTools.Actors
                     yield return waiter.Wait;
                 }
             }
-            
         }
         
         private IEnumerator ExecuteEffectsRoutine(Vector3 position)
@@ -239,7 +289,6 @@ namespace CoolTools.Actors
                     yield return waiter.Wait;
                 }
             }
-            
         }
         
         private IEnumerator ExecuteEffectsRoutine(IDetectable target)
@@ -252,7 +301,6 @@ namespace CoolTools.Actors
                     yield return waiter.Wait;
                 }
             }
-            
         }
         
         private IEnumerator ExecuteEffectsRoutine(Actor target)
@@ -265,14 +313,14 @@ namespace CoolTools.Actors
                     yield return waiter.Wait;
                 }
             }
-            
         }
-        
+
         public void CastAbility()
         {
             if (!IsReadyToCast()) return;
             
             State = CasterState.Casting;
+            _castingTarget = CastingTarget.None;
             
             _castingRoutine = StartCoroutine(CastingRoutine(ExecuteEffectsRoutine()));
             ActorCombatEvents.OnActorCastAbility?.Invoke(_castingAbility);
@@ -285,7 +333,8 @@ namespace CoolTools.Actors
             if (!IsReadyToCast()) return;
             
             State = CasterState.Casting;
-            _castPosition = position;
+            _castingTarget = CastingTarget.Position;
+            _targetPosition = position;
             
             _castingRoutine = StartCoroutine(CastingRoutine(ExecuteEffectsRoutine(position)));
             ActorCombatEvents.OnActorCastAbility?.Invoke(_castingAbility);
@@ -298,9 +347,9 @@ namespace CoolTools.Actors
             if (!IsReadyToCast()) return;
 
             State = CasterState.Casting;
+            _castingTarget = CastingTarget.IDetectable;
+            _targetDetectable = target;
             
-            _castTarget = target;
-            _castTargetPoint = target.TargetPoint;
             // Cast the ability with target transform here
             
             _castingRoutine = StartCoroutine(CastingRoutine(ExecuteEffectsRoutine(target)));
@@ -314,9 +363,9 @@ namespace CoolTools.Actors
             if (!IsReadyToCast()) return;
 
             State = CasterState.Casting;
+            _castingTarget = CastingTarget.Actor;
+            _targetActor = target;
             
-            _castTargetActor = target;
-            _castTargetPoint = target.transform;
             // Cast the ability with target transform here
             
             _castingRoutine = StartCoroutine(CastingRoutine(ExecuteEffectsRoutine(target)));

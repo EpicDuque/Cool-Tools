@@ -10,6 +10,9 @@ namespace CoolTools.Actors
         [ColorSpacer("Damageable Resource")] 
         [SerializeField] protected bool _invincible;
         
+        [Space(10f)] 
+        [SerializeField] private DamageMultiplier[] _multipliers;
+        
         [ColorSpacer("Events")]
         [SerializeField] protected DamageableEvents _damageableEvents;
         
@@ -30,6 +33,7 @@ namespace CoolTools.Actors
         {
             [Space(10f)]
             public DamageType DamageType;
+            public bool AllTypes;
             
             [Space(5f)]
             public Formula FormulaMultiplier;
@@ -70,6 +74,9 @@ namespace CoolTools.Actors
             if (!IsAlive) return;
             if (Invincible) return;
 
+            var amount = Mathf.RoundToInt(data.Amount * GetMultiplier(data.Type));
+            data.Amount = amount;
+            
             LastDamage = data;
             Amount -= data.Amount;
             
@@ -79,6 +86,21 @@ namespace CoolTools.Actors
                 Events.OnDamage?.Invoke(data.Amount);
         }
 
+        private float GetMultiplier(DamageType damageType)
+        {
+            float totalMultiplier = 1f;
+            
+            foreach (var multiplier in _multipliers)
+            {
+                if (multiplier.AllTypes || multiplier.DamageType == damageType)
+                {
+                    totalMultiplier *= multiplier.Multiplier;
+                }
+            }
+
+            return totalMultiplier;
+        }
+        
         [ContextMenu("Kill")]
         public virtual void Kill()
         {
@@ -95,8 +117,8 @@ namespace CoolTools.Actors
         {
             if (IsAlive) return;
             
-            Events.OnRevive?.Invoke();
             Restore();
+            Events.OnRevive?.Invoke();
         }
     }
 }

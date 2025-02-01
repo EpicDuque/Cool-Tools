@@ -7,6 +7,7 @@ namespace CoolTools.Actors
     {
         public GameObject GO { get; }
         public bool IsAlive { get; }
+        public bool Invincible { get; set; }
         void DealDamage(DamageParams data);
         public int Health { get; }
         public int MaxHealth { get; }

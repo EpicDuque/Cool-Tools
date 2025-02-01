@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CoolTools.Attributes;
+using Cooltools.Utilities;
 using UnityEngine;
 
 namespace CoolTools.Actors
@@ -77,8 +78,14 @@ namespace CoolTools.Actors
             {
                 if(obj == Detectable.Null) continue;
                 
+                if(obj.BypassDetection)
+                    _objectsToRemove.AddUnique(obj);
+                
                 if(!obj.gameObject.activeSelf)
-                    _objectsToRemove.Add(obj);
+                    _objectsToRemove.AddUnique(obj);
+                
+                if (obj == null)
+                    _objectsToRemove.AddUnique(obj);
             }
 
             if (_objectsToRemove.Count > 0)
@@ -133,7 +140,7 @@ namespace CoolTools.Actors
             {
                 var hit = _hits[i];
                 Detectable detectable;
-                if (hit.TryGetComponent(out detectable) && !detectable.BypassDetection)
+                if (hit.TryGetComponent(out detectable) && !detectable.BypassDetection && detectable.Owner != Owner)
                 {
                     _detectedTargets[slot] = detectable;
                     

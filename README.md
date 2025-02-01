@@ -1,5 +1,5 @@
 <h2>COOL TOOLS</h2>
-<h3> Version: 0.2.5 </h3>
+<h3> Version: 0.2.6 </h3>
 
 <br>
 This is a collection of tools that aims to help speed up early prototyping and development of Unity projects.
@@ -34,4 +34,3 @@ can be assigned to it. Now whenever this projectile hits something (or someone..
 know everything about the Actor that shot that projectile, including it's stats (covered later) to calculate damage, for exmaple.
 
 <br>
-More information will be added as the tools are developed.

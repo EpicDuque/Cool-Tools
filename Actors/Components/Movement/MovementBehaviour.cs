@@ -23,9 +23,9 @@ namespace CoolTools.Actors
             public bool UseMoveSpeedInputCurve;
             public ValueCurve MoveSpeedInputCurve;
 
-            [Space(10f)]
-            public bool UpdateAgentPosition = true;
-            public bool UpdateAgentRotation = true;
+            // [Space(10f)]
+            // public bool UpdateAgentPosition = true;
+            // public bool UpdateAgentRotation = true;
 
             [Space(10f)] 
             public bool UseGravity = true;
@@ -186,12 +186,14 @@ namespace CoolTools.Actors
             //     MovementBehaviourSystem.UnregisterInstance(this);
         }
 
-        private void Start()
+        private new void Awake()
         {
+            base.Awake();
+            
             Setup();
         }
 
-        protected virtual void Setup()
+        public virtual void Setup()
         {
             HasCharacterController = _characterController != null;
             HasNavMeshAgent = _navMeshAgent != null;
@@ -216,8 +218,8 @@ namespace CoolTools.Actors
             if (!HasNavMeshAgent) return;
             
             _navMeshAgent.speed = _maxMovementSpeed.Value;
-            _navMeshAgent.updateRotation = _movementSettings.UpdateAgentRotation;
-            _navMeshAgent.updatePosition = _movementSettings.UpdateAgentPosition;
+            // _navMeshAgent.updateRotation = _movementSettings.UpdateAgentRotation;
+            // _navMeshAgent.updatePosition = _movementSettings.UpdateAgentPosition;
         }
         
         protected override void OnStatsUpdated()
@@ -244,8 +246,15 @@ namespace CoolTools.Actors
                 movement = new Vector3(MovementInput.x, 0f, MovementInput.y).normalized * 
                            (_speed * Time.deltaTime);
             }
-            
-            Move(movement);
+
+            if (!HasNavMeshAgent)
+            {
+                CCMove(movement);
+            }
+            else if (!NavMeshAgent.hasPath)
+            {
+                NavMeshAgent.velocity = new Vector3(MovementInput.x, 0f, MovementInput.y).normalized * NavMeshAgent.speed;
+            }
         }
         
         /// <summary>
@@ -271,6 +280,7 @@ namespace CoolTools.Actors
         private void GravityStep()
         {
             if (!Settings.UseGravity) return;
+            if (HasNavMeshAgent) return;
             
             if (!IsGrounded)
             {
@@ -287,22 +297,19 @@ namespace CoolTools.Actors
 
             var move = new Vector3(0, verticalVelocity, 0) * Time.deltaTime;
 
-            Move(move);
+            CCMove(move);
         }
 
-        private void Move(Vector3 movement)
+        private void CCMove(Vector3 movement)
         {
-            if (!HasNavMeshAgent || HasNavMeshAgent && !_navMeshAgent.updatePosition)
+            if (HasCharacterController)
             {
-                if (HasCharacterController)
-                {
-                    if(_characterController.enabled)
-                        _characterController.Move(movement);
-                }
-                else
-                {
-                    Owner.transform.Translate(movement);
-                }
+                if(_characterController.enabled)
+                    _characterController.Move(movement);
+            }
+            else
+            {
+                Owner.transform.Translate(movement);
             }
         }
         

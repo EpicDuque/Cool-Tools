@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CoolTools.Utilities
 {
@@ -11,6 +12,7 @@ namespace CoolTools.Utilities
         public void Initialize(State state)
         {
             CurrentState = state;
+            CurrentState.OnEnter();
         }
 
         public virtual void UpdateFSM()
@@ -41,16 +43,28 @@ namespace CoolTools.Utilities
         {
             public StateMachine Context { get; }
             
-            private readonly Dictionary<State, Func<bool>> transitions = new();
+            private readonly Dictionary<State, Func<bool>> _transitions = new();
+            
+            private readonly Dictionary<State, float> _originalTransitionTimers = new();
+
+            private readonly List<State> _timerStates = new();
+            private readonly List<float> _timers = new(); 
 
             public State(StateMachine context)
             {
                 Context = context;
             }
 
-            public void AddTransition(State to, Func<bool> transition)
+            public void AddTransition(State to, Func<bool> condition)
             {
-                transitions.Add(to, transition);
+                _transitions.Add(to, condition);
+            }
+
+            public void AddTransition(State to, float timer)
+            {
+                _timerStates.Add(to);
+                _timers.Add(timer);
+                _originalTransitionTimers.Add(to, timer);
             }
             
             protected internal virtual void OnEnter(){}
@@ -61,7 +75,7 @@ namespace CoolTools.Utilities
 
             public State EvaluateTransitions()
             {
-                foreach (var kvp in transitions)
+                foreach (var kvp in _transitions)
                 {
                     if (kvp.Value.Invoke())
                     {
@@ -69,6 +83,20 @@ namespace CoolTools.Utilities
                     }
                 }
 
+                foreach (var state in _timerStates)
+                {
+                    var timerIndex = _timerStates.IndexOf(state);
+                    var time = _timers[timerIndex];
+                    
+                    if (time <= 0)
+                    {
+                        _timers[timerIndex] = _originalTransitionTimers[state];
+                        return state;
+                    }
+
+                    _timers[timerIndex] -= Time.deltaTime;
+                }
+                
                 return null;
             }
         }

@@ -18,7 +18,6 @@ namespace CoolTools.Actors
         [Tooltip("Enable to detect hits using raycast against last position. Suitable for fast moving projectiles.")]
         [SerializeField] private bool _useShapecast = true;
         [SerializeField] private float _shapeCastRadius = 0.1f;
-        // [SerializeField] private ShapeCastType _castType;
         
         [Space(10f)]
         [SerializeField] private float _disposeDelay = 0.5f;
@@ -46,9 +45,9 @@ namespace CoolTools.Actors
         private int _hitCount;
         private Vector3 _lastPosition;
         private readonly RaycastHit[] _raycastHits = new RaycastHit[32];
-        private PoolableObject _poolableObject;
         private bool _disposing;
-        private bool _hasTargetPosition;
+        private bool _hasTarget;
+        private bool _isKinematic;
 
         private enum ShapeCastType
         {
@@ -63,8 +62,7 @@ namespace CoolTools.Actors
             public UnityEvent OnDestroyed;
         }
         
-        public IDetectable Target { get; set; }
-        public Vector3 TargetPosition { get; set; }
+        public Detectable Target { get; protected set; }
 
         public float HomingFactor
         {
@@ -99,6 +97,8 @@ namespace CoolTools.Actors
                 }
             }
         }
+        
+        public ProjectileLauncher Launcher { get; set; }
 
         private void OnValidate()
         {
@@ -117,17 +117,20 @@ namespace CoolTools.Actors
             }
         }
 
-        protected override void OnStatsUpdated()
+        protected new void Awake()
         {
-            base.OnStatsUpdated();
+            base.Awake();
 
-            UpdateValues();
-        }
-
-        private void UpdateValues()
-        {
-            _maxSpeed.UpdateValue(this);
-            _maxHits.UpdateValue(this);
+            _rigidbody = GetComponent<Rigidbody>();
+            _hitBox = GetComponent<HitBox>();
+            
+            _isKinematic = _rigidbody.isKinematic;
+            
+            _hasHitBox = _hitBox != null;
+            if (_hasHitBox)
+            {
+                _hitBox.Events.OnHit.AddListener(OnHitBoxHit);
+            }
         }
 
         private void OnEnable()
@@ -141,56 +144,44 @@ namespace CoolTools.Actors
         private void OnDisable()
         {
             ProjectileSystem.UnregisterProjectile(this);
-        }
-
-        protected new void Awake()
-        {
-            base.Awake();
-
-            _rigidbody = GetComponent<Rigidbody>();
-            _hitBox = GetComponent<HitBox>();
-            
-            _hasHitBox = _hitBox != null;
-            if (_hasHitBox)
-            {
-                _hitBox.Events.OnHit.AddListener(OnHitBoxHit);
-            }
-        }
-
-        private void Start()
-        {
-            
-        }
-
-        public void Initialize(IDetectable target)
-        {
-            Initialize();
-            
-            Target = target;
-            _hasTargetPosition = false;
+            _hasTarget = false;
         }
         
-        public void Initialize(Vector3 targetPosition)
+        protected override void OnStatsUpdated()
         {
-            Initialize();
+            base.OnStatsUpdated();
 
-            Target = null;
-            TargetPosition = targetPosition;
-            _hasTargetPosition = true;
+            UpdateValues();
         }
 
-        public void Initialize(Transform target)
+        private void UpdateValues()
         {
-            Initialize();
+            _maxSpeed.UpdateValue(this);
+            _maxHits.UpdateValue(this);
         }
         
         public void Initialize()
         {
             UpdateValues();
             
-            _events.OnLaunched?.Invoke();
             _hitBox.enabled = true;
             _disposing = false;
+            _model.SetActive(true);
+            _rigidbody.isKinematic = _isKinematic;
+            
+            _events.OnLaunched?.Invoke();
+        }
+        
+        public void SetTarget(Detectable target)
+        {
+            _hasTarget = target != null;
+            Target = target;
+        }
+
+        public void ReleaseTarget()
+        {
+            _hasTarget = false;
+            Target = Detectable.Null;
         }
 
         private void OnHitBoxHit(IDamageable other)
@@ -200,8 +191,8 @@ namespace CoolTools.Actors
                 if (other is MonoBehaviour mb)
                 {
                     // Move the projectile to the same XZ position as the last target hit
-                    var otherXZ = new Vector3(mb.transform.position.x, transform.position.y, mb.transform.position.z);
-                    transform.position = otherXZ;
+                    // var otherXZ = new Vector3(mb.transform.position.x, transform.position.y, mb.transform.position.z);
+                    // transform.position = otherXZ;
                 }
             }
             
@@ -283,17 +274,14 @@ namespace CoolTools.Actors
 
         private void Update()
         {
-            if (Target != null)
+            if (_rotateTowardsMovement && _rigidbody.velocity != Vector3.zero)
             {
-                TargetPosition = Target.TargetPoint.position;
+                transform.forward = _rigidbody.velocity.normalized;
             }
             
-            if (_rotateTowardsMovement)
+            if (_hasTarget && (Target == null || Target.BypassDetection || Target.GO == null))
             {
-                if (_rigidbody.velocity != Vector3.zero)
-                {
-                    transform.forward = _rigidbody.velocity.normalized;
-                }
+                ReleaseTarget();
             }
         }
 
@@ -302,23 +290,27 @@ namespace CoolTools.Actors
             UpdateShapeCastHit();
             
             // Apply Acceleration to rigidBody
-            if (Target != null)
+            if (_hasTarget && Target != null && !Target.BypassDetection && _rigidbody.velocity.sqrMagnitude > 0.2f)
             {
-                var direction = Target.TargetPoint.position - transform.position;
-                _rigidbody.AddForce(direction.normalized * (_homingFactor), ForceMode.Force);
+                var dir = (Target.GO.transform.position - transform.position).normalized;
+                var force = dir * _homingFactor;
+
+                var dot = Vector3.Dot(dir, _rigidbody.velocity.normalized);
+                force *= (1f - dot);
+                _rigidbody.AddForce(force, ForceMode.Force);
             }
-            else if (_hasTargetPosition)
-            {
-                var direction = TargetPosition - transform.position;
-                _rigidbody.AddForce(direction.normalized * _acceleration, ForceMode.Force);
-            } 
+            // else if (_hasTargetPosition)
+            // {
+            //     var direction = TargetPosition - transform.position;
+            //     _rigidbody.AddForce(direction.normalized * _acceleration, ForceMode.Force);
+            // } 
             else
             {
                 _rigidbody.AddForce(transform.forward * _acceleration, ForceMode.Force);
             }
             
             // Limit velocity to maxSpeed
-            if(!_rigidbody.isKinematic && _maxSpeed.Value > 0f)
+            if(_maxSpeed.Value > 0f)
                 _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, _maxSpeed.Value);
         }
 
@@ -329,9 +321,9 @@ namespace CoolTools.Actors
             _hitBox.enabled = false;
             _disposing = true;
             
+            ReleaseTarget();
             StopPhysics();
-            _hasTargetPosition = false;
-            Target = null;
+            // _hasTargetPosition = false;
 
             _model.SetActive(false);
             _events.OnDestroyed?.Invoke();
@@ -341,10 +333,7 @@ namespace CoolTools.Actors
 
         private void ReturnToPool()
         {
-            if(TryGetComponent<PoolableObject>(out var poolable))
-                poolable.ReturnToPool();
-            else
-                Destroy(gameObject);
+            PoolableObject.DestroyOrReturn(gameObject);
         }
 
         public void StopPhysics()

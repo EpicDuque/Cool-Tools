@@ -57,9 +57,9 @@ namespace CoolTools.Utilities
 
             if (!_disposing && _count >= _timeToLive)
             {
+                _disposing = true;
                 OnTimeOut?.Invoke();
                 DestroyObject();
-                _disposing = true;
             }
         }
 

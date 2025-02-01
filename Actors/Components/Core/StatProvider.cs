@@ -214,7 +214,6 @@ namespace CoolTools.Actors
 
             if (!Application.isPlaying) return;
             
-            // Events.StatsUpdated?.Invoke();
             StatsUpdated?.Invoke();
         }
 

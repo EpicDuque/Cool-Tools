@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using CoolTools.Utilities;
 using UnityEngine.SceneManagement;
 
@@ -7,83 +8,71 @@ namespace CoolTools.Actors
     [CreateAssetMenu(fileName = "New Launcher Module", menuName = "Modules/Launcher/Linear (Default)", order = 0)]
     public class LauncherModule : ScriptableObject
     {
-        [SerializeField] private bool _zeroY = true;
-        [SerializeField] private ForceMode _forceMode = ForceMode.VelocityChange;
+        private int _launchAmount = 1;
+        public bool UsePool { get; set; }
 
-        private bool _usePool;
-        private ObjectPool _pool;
-        
-        public virtual void SetPool(ObjectPool pool)
+        public virtual int LaunchAmount
         {
-            _pool = pool;
-            _usePool = _pool != null;
+            get => _launchAmount;
+            set =>  _launchAmount = 1;
+        }
+
+        // ReSharper disable Unity.PerformanceAnalysis
+        public virtual void Launch(ProjectileLauncher launcher, ObjectPool pool)
+        {
+            for (int i = 0; i < LaunchAmount; i++)
+            {
+                var spawnPosition = GetSpawnPosition(launcher, i);
+                var spawnRotation = GetSpawnRotation(launcher, i);
+                
+                var p = CreateProjectile(launcher, pool, spawnPosition, spawnRotation);
+                
+                launcher.Events.OnLaunchedProjectile.Invoke(p);
+            }
+        }
+
+        protected virtual Vector3 GetSpawnPosition(ProjectileLauncher launcher, int index)
+        {
+            return launcher.LaunchPoint.position;
         }
         
-        public virtual Projectile Launch(ProjectileLauncher launcher)
+        protected virtual Quaternion GetSpawnRotation(ProjectileLauncher launcher, int index)
         {
-            var launchPoint = launcher.LaunchPoint;
-            var scene = launcher.gameObject.scene;
-            
-            var projectile = CreateProjectile(launcher, launchPoint, scene);
+            return launcher.LaunchPoint.rotation;
+        }
 
-            var launchForce = launcher.LaunchForce.Value;
-            
-            InitializeProjectile(launcher, projectile);
-            
-            if (_zeroY)
+        protected virtual Projectile CreateProjectile(ProjectileLauncher launcher, ObjectPool pool, Vector3 position, Quaternion rotation)
+        {
+            var prefab = launcher.ProjectilePrefab;
+
+            Projectile p = null;
+            if (UsePool)
             {
-                projectile.transform.forward = new Vector3(launchPoint.forward.x, 0f, launchPoint.forward.z);
+                p = launcher.SpawnWithOwnership(prefab, position, rotation, pool);
             }
             else
             {
-                projectile.transform.forward = launchPoint.forward.normalized;
+                p = launcher.SpawnWithOwnership(prefab, position, rotation);
             }
 
-            var shootDirection = projectile.transform.forward;
-
-            var rb = projectile.RB;
+            p.Launcher = launcher;
             
-            rb.isKinematic = false;
-            rb.ResetInertiaTensor();
-            rb.ResetCenterOfMass();
-            
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            
-            rb.AddForce(shootDirection * launchForce, _forceMode);
-            
-            return projectile;
-        }
-
-        protected void InitializeProjectile(ProjectileLauncher launcher, Projectile projectile)
-        {
-            if(launcher.Target != null)
-                projectile.Initialize(launcher.Target);
-            else if(launcher.UseTargetPosition)
-                projectile.Initialize(launcher.TargetPosition);
-            else
-                projectile.Initialize();
-
-            projectile.OriginLauncher = launcher;
-        }
-
-        protected virtual Projectile CreateProjectile(ProjectileLauncher launcher, Transform launchPoint, Scene scene)
-        {
-            Projectile projectile = null;
-            if (_usePool)
+            switch (launcher.ETargetMode)
             {
-                projectile = _pool.Pull<Projectile>(launcher.ProjectilePrefab.name, 
-                    launchPoint.position, launchPoint.rotation, scene);
+                case ProjectileLauncher.TargetMode.None:
+                    p.ReleaseTarget();
+                    break;
+                case ProjectileLauncher.TargetMode.Detectable:
+                    p.SetTarget(launcher.Target);
+                    break;
+                case ProjectileLauncher.TargetMode.Position:
+                    break;
             }
-            
-            if (!_usePool || projectile == null)
-            {
-                projectile = Instantiate(launcher.ProjectilePrefab, launchPoint.position, launchPoint.rotation);
-            }
-            
-            projectile.Owner = launcher.Owner;
 
-            return projectile;
+            p.Initialize();
+            p.RB.velocity = p.transform.forward * launcher.LaunchForce.Value;
+
+            return p;
         }
     }
 }

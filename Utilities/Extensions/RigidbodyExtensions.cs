@@ -6,7 +6,7 @@ namespace CoolTools.Utilities
     {
         /// <summary>
         /// Pushes a rigidbody to <paramref name="target"/> in <paramref name="period"/> seconds. The longer
-        /// the time the higher the movement arch is
+        /// the time the higher the movement arch is.
         /// </summary>
         /// <param name="target">Where the rigidbody needs top land</param>
         /// <param name="period">Time in seconds to take for the movement</param>
